@@ -132,10 +132,7 @@ class _InstructionState extends State<InstructionWidget>{
                 Padding(
                   padding: EdgeInsets.all(15),
                   child: Center(
-                      child: Image(
-                      image: AssetImage('assets/my_icon.png'),
-                      width: 150,
-                    )
+                      child: Container()
                   ),
                 ),
                 Padding(

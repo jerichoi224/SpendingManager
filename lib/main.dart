@@ -55,7 +55,6 @@ class _MyAppState extends State<MyApp> {
         title: 'Workout Tracker',
         theme: ThemeData(
           brightness: Brightness.light,
-          primarySwatch: Colors.amber,
         ),
         localizationsDelegates: [AppLocalizations.delegate, MaterialLocalizationKrDelegate(), CupertinoLocalizationKrDelegate()],
         supportedLocales: AppLocalizations.supportedLocales,
@@ -104,10 +103,7 @@ class _MainState extends State<MainApp> {
             Padding(
               padding: EdgeInsets.all(15),
               child: Center(
-                child: Image(
-                image: AssetImage('assets/my_icon.png'),
-                width: 150,
-                )
+                child: Container()
               ),
             ),
         ]
