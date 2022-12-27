@@ -116,17 +116,26 @@ void editText(
     case "8":
     case "9":
     case "0":
+      if (editingController.text.isEmpty && key == "0") {
+        break;
+      }
+
       if (editingController.text.length < textLimit) {
         _insertText(key, editingController, false);
       }
       break;
     case ".":
       if (editingController.text.length < textLimit &&
-          !editingController.text.contains(".") &&
-          textLimit != 3) _insertText(key, editingController, false);
+          !editingController.text.contains(".")) {
+        if (editingController.text.isEmpty) {
+          _insertText("0", editingController, false);
+        }
+        _insertText(key, editingController, false);
+      }
       break;
     case "<-":
       if (editingController.text.isNotEmpty) _backspace(editingController);
+      if (editingController.text == "0") _backspace(editingController);
       break;
   }
 }
@@ -135,8 +144,8 @@ Widget customKeyboard(TextEditingController editingController, int textLimit,
     [Function? method]) {
   return Container(
     padding: const EdgeInsets.fromLTRB(0, 6, 0, 6),
-    height: 380.0,
-    width: 350,
+    height: 340.0,
+    width: 320,
     child: Column(
       children: [
         Expanded(

@@ -41,9 +41,9 @@ class _HomeState extends State<HomeWidget> {
 
   List<Widget> _children() => [
         SpendWidget(datastore: widget.datastore),
+      CalendarWidget(datastore: widget.datastore),
         RoutineWidget(datastore: widget.datastore),
         DashboardWidget(datastore: widget.datastore),
-        CalendarWidget(datastore: widget.datastore),
         SettingsWidget(datastore: widget.datastore),
       ];
 
@@ -86,7 +86,11 @@ class _HomeState extends State<HomeWidget> {
                       ),
                       label: "Spend"),
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.repeat), label: "2"),
+                      icon: Icon(
+                        CarbonIcons.calendar,
+                        size: 32,
+                      ),
+                      label: "Calendar"),
                   BottomNavigationBarItem(
                       icon: Icon(Icons.insert_chart_outlined), label: "1"),
                   BottomNavigationBarItem(
