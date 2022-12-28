@@ -22,7 +22,7 @@ final _entities = <ModelEntity>[
   ModelEntity(
       id: const IdUid(1, 8560210450077052426),
       name: 'SpendingEntry',
-      lastPropertyId: const IdUid(3, 909106519423985789),
+      lastPropertyId: const IdUid(9, 5087545426494177644),
       flags: 0,
       properties: <ModelProperty>[
         ModelProperty(
@@ -38,6 +38,26 @@ final _entities = <ModelEntity>[
         ModelProperty(
             id: const IdUid(3, 909106519423985789),
             name: 'value',
+            type: 8,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(4, 6493336795288176181),
+            name: 'dateTime',
+            type: 6,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(7, 1459171979900264546),
+            name: 'tagId',
+            type: 9,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(8, 491636686344489777),
+            name: 'itemType',
+            type: 6,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(9, 5087545426494177644),
+            name: 'accId',
             type: 6,
             flags: 0)
       ],
@@ -71,7 +91,7 @@ ModelDefinition getObjectBoxModel() {
       lastSequenceId: const IdUid(0, 0),
       retiredEntityUids: const [],
       retiredIndexUids: const [],
-      retiredPropertyUids: const [],
+      retiredPropertyUids: const [5060431788235565225, 5741241459831399899],
       retiredRelationUids: const [],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
@@ -88,10 +108,15 @@ ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (SpendingEntry object, fb.Builder fbb) {
           final captionOffset = fbb.writeString(object.caption);
-          fbb.startTable(4);
+          final tagIdOffset = fbb.writeString(object.tagId);
+          fbb.startTable(10);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, captionOffset);
-          fbb.addInt64(2, object.value);
+          fbb.addFloat64(2, object.value);
+          fbb.addInt64(3, object.dateTime);
+          fbb.addOffset(6, tagIdOffset);
+          fbb.addInt64(7, object.itemType);
+          fbb.addInt64(8, object.accId);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -104,7 +129,15 @@ ModelDefinition getObjectBoxModel() {
             ..caption = const fb.StringReader(asciiOptimization: true)
                 .vTableGet(buffer, rootOffset, 6, '')
             ..value =
-                const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0);
+                const fb.Float64Reader().vTableGet(buffer, rootOffset, 8, 0)
+            ..dateTime =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0)
+            ..tagId = const fb.StringReader(asciiOptimization: true)
+                .vTableGet(buffer, rootOffset, 16, '')
+            ..itemType =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0)
+            ..accId =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
 
           return object;
         })
@@ -125,5 +158,21 @@ class SpendingEntry_ {
 
   /// see [SpendingEntry.value]
   static final value =
-      QueryIntegerProperty<SpendingEntry>(_entities[0].properties[2]);
+      QueryDoubleProperty<SpendingEntry>(_entities[0].properties[2]);
+
+  /// see [SpendingEntry.dateTime]
+  static final dateTime =
+      QueryIntegerProperty<SpendingEntry>(_entities[0].properties[3]);
+
+  /// see [SpendingEntry.tagId]
+  static final tagId =
+      QueryStringProperty<SpendingEntry>(_entities[0].properties[4]);
+
+  /// see [SpendingEntry.itemType]
+  static final itemType =
+      QueryIntegerProperty<SpendingEntry>(_entities[0].properties[5]);
+
+  /// see [SpendingEntry.accId]
+  static final accId =
+      QueryIntegerProperty<SpendingEntry>(_entities[0].properties[6]);
 }

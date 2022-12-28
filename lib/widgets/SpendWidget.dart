@@ -1,6 +1,9 @@
 import 'package:carbon_icons/carbon_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/dbTool.dart';
+import 'package:spending_manager/util/enum.dart';
 import 'package:spending_manager/widgets/components/keyboardWidget.dart';
 
 class SpendWidget extends StatefulWidget {
@@ -14,22 +17,106 @@ class SpendWidget extends StatefulWidget {
 
 class _SpendState extends State<SpendWidget> {
   TextEditingController editingController = TextEditingController();
-  String category = "";
+  String tag = "";
   String account = "";
   String note = "";
+  ItemType itemType = ItemType.expense;
   int textLimit = 10;
+  DateTime date = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    account = "Bank A";
-    category = "Unknown";
-    note = "YouTube Premium";
-    editingController.text = "";
+    resetAll();
     editingController.addListener(() {
       debugPrint(editingController.text);
       setState(() {});
     });
+  }
+
+  void resetAll()
+  {
+    account = "Bank A";
+    tag = "Unknown";
+    note = "YouTube Premium";
+    editingController.text = "";
+    itemType = ItemType.expense;
+  }
+
+  Widget toggleButton(String caption) {
+    return Expanded(
+      child: Container(
+          height: 40,
+          margin: const EdgeInsets.fromLTRB(2, 0, 2, 0),
+          child: Ink(
+            height: 40,
+            decoration: BoxDecoration(
+              color: caption.toUpperCase() == itemType.string.toUpperCase()
+                  ? Colors.blue.shade300
+                  : Colors.blue.shade100,
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+            ),
+            child: InkWell(
+                borderRadius: BorderRadius.circular(10.0),
+                highlightColor: Colors.blue,
+                onTap: () {
+                  setState(() {
+                    itemType = ItemType.values.byName(caption.toLowerCase());
+                  });
+                },
+                child: Center(
+                  child: Text(
+                    caption,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                )),
+          )),
+    );
+  }
+
+  void saveItem()
+  {
+    if(itemType != ItemType.transfer)
+    {
+      SpendingEntry entry = SpendingEntry();
+      entry.itemType = itemType.intVal;
+      entry.caption = note;
+      entry.dateTime = date.millisecondsSinceEpoch;
+      entry.accId = 0;
+      entry.tagId = tag;
+      entry.value = double.parse(editingController.text);
+
+      if(itemType == ItemType.expense) {
+        entry.value *= -1;
+      }
+
+      widget.datastore.spendingBox.put(entry);
+    }
+    else
+    {
+      SpendingEntry entrySpent = SpendingEntry();
+      entrySpent.itemType = itemType.intVal;
+      entrySpent.caption = note;
+      entrySpent.dateTime = date.millisecondsSinceEpoch;
+      entrySpent.accId = 0; // sending account
+      entrySpent.tagId = "Transfer";
+      entrySpent.value = double.parse(editingController.text) * -1;
+
+      SpendingEntry entryReceive = SpendingEntry();
+      entryReceive.itemType = itemType.intVal;
+      entryReceive.caption = note;
+      entryReceive.dateTime = date.millisecondsSinceEpoch;
+      entryReceive.accId = 0; // receiving account
+      entryReceive.tagId = "Transfer";
+      entryReceive.value = double.parse(editingController.text);
+
+      widget.datastore.spendingBox.put(entrySpent);
+      widget.datastore.spendingBox.put(entryReceive);
+    }
+
+    widget.datastore.spendingList = widget.datastore.spendingBox.getAll();
+
+    resetAll();
   }
 
   @override
@@ -42,10 +129,31 @@ class _SpendState extends State<SpendWidget> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Spacer(),
+              //************ DATE ************//
+              Container(
+                height: 30,
+                width: 120,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      DateFormat('yyyy-MM-dd').format(date),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               //************ MONEY AMOUNT ************//
               Container(
                 height: 80,
-                padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                padding: const EdgeInsets.fromLTRB(0, 0 , 0, 0),
                 margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
                 child: Row(
                   children: [
@@ -75,8 +183,10 @@ class _SpendState extends State<SpendWidget> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(
-                            CarbonIcons.account,
+                          Icon(
+                            itemType.string == "transfer"
+                                ? CarbonIcons.logout
+                                : CarbonIcons.account,
                             color: Colors.black54,
                           ),
                           const Spacer(),
@@ -101,13 +211,15 @@ class _SpendState extends State<SpendWidget> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(
-                            CarbonIcons.tag,
+                          Icon(
+                            itemType.string == "transfer"
+                                ? CarbonIcons.login
+                                : CarbonIcons.tag,
                             color: Colors.black54,
                           ),
                           const Spacer(),
                           Text(
-                            category,
+                            tag,
                             style: TextStyle(fontSize: 16),
                           ),
                         ],
@@ -139,60 +251,45 @@ class _SpendState extends State<SpendWidget> {
                   ],
                 ),
               ),
-              //************ Income Button ************//
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Container(
-                        height: 60,
-                        margin: const EdgeInsets.fromLTRB(30, 5, 5, 0),
-                        child: Ink(
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade300,
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(25)),
-                          ),
-                          child: InkWell(
-                              borderRadius: BorderRadius.circular(25.0),
-                              highlightColor: Colors.blue,
-                              onTap: () {},
-                              child: Center(
-                                child: Text(
-                                  "Income",
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                              )),
-                        )),
-                  ),
-                  //************ Spend Button ************//
-                  Expanded(
-                    child: Container(
-                        height: 60,
-                        margin: const EdgeInsets.fromLTRB(5, 5, 30, 0),
-                        child: Ink(
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade300,
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(25)),
-                          ),
-                          child: InkWell(
-                              borderRadius: BorderRadius.circular(25),
-                              highlightColor: Colors.blue,
-                              onTap: () {},
-                              child: Center(
-                                child: Text(
-                                  "Spend",
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                              )),
-                        )),
-                  ),
-                ],
+              //************ Three Toggles ************//
+              Container(
+                margin: const EdgeInsets.fromLTRB(28, 0, 28, 5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    toggleButton("Income"),
+                    toggleButton("Transfer"),
+                    toggleButton("Expense"),
+                  ],
+                ),
               ),
+              //************ Enter Button ************//
+              Container(
+                  height: 60,
+                  margin: const EdgeInsets.fromLTRB(30, 0, 30, 5),
+                  child: Ink(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade400,
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    ),
+                    child: InkWell(
+                        borderRadius: BorderRadius.circular(10.0),
+                        highlightColor: Colors.blue,
+                        onTap: () {
+                          saveItem();
+                          setState(() {
+                          });
+                        },
+                        child: Center(
+                          child: Text(
+                            "Enter",
+                            style: const TextStyle(fontSize: 24),
+                          ),
+                        )),
+                  )),
+              //************ Keyboard ************//
               Center(
                 child: customKeyboard(editingController, textLimit, null),
               )

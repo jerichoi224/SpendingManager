@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:8560210450077052426",
-      "lastPropertyId": "3:909106519423985789",
+      "lastPropertyId": "9:5087545426494177644",
       "name": "SpendingEntry",
       "properties": [
         {
@@ -22,6 +22,26 @@
         {
           "id": "3:909106519423985789",
           "name": "value",
+          "type": 8
+        },
+        {
+          "id": "4:6493336795288176181",
+          "name": "dateTime",
+          "type": 6
+        },
+        {
+          "id": "7:1459171979900264546",
+          "name": "tagId",
+          "type": 9
+        },
+        {
+          "id": "8:491636686344489777",
+          "name": "itemType",
+          "type": 6
+        },
+        {
+          "id": "9:5087545426494177644",
+          "name": "accId",
           "type": 6
         }
       ],
@@ -36,7 +56,10 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    5060431788235565225,
+    5741241459831399899
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

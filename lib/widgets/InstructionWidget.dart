@@ -51,7 +51,7 @@ class _InstructionState extends State<InstructionWidget>{
   }
 
   showSnackBar(BuildContext context, String s){
-    Scaffold.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(s),
       duration: Duration(seconds: 3),
     ));
