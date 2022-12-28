@@ -16,7 +16,8 @@ class SpendWidget extends StatefulWidget {
 }
 
 class _SpendState extends State<SpendWidget> {
-  TextEditingController editingController = TextEditingController();
+  TextEditingController valueEditingController = TextEditingController();
+  TextEditingController noteEditingController = TextEditingController();
   String tag = "";
   String account = "";
   String note = "";
@@ -28,10 +29,31 @@ class _SpendState extends State<SpendWidget> {
   void initState() {
     super.initState();
     resetAll();
-    editingController.addListener(() {
-      debugPrint(editingController.text);
+    valueEditingController.addListener(() {
       setState(() {});
     });
+  }
+
+  Future<int> _selectDate(BuildContext context, DateTime dateTime) async {
+    DateTime? pickedDate = await showDatePicker(
+        context: context,
+        initialDate: dateTime,
+        firstDate: DateTime(2000, 1),
+        lastDate: DateTime(2101)
+    );
+    if(pickedDate == null)
+      return 0;
+
+    TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(dateTime),
+    );
+    if(pickedTime == null)
+      return 0;
+
+    DateTime picked = new DateTime(pickedDate.year, pickedDate.month, pickedDate.day, pickedTime.hour, pickedTime.minute);
+
+    return picked.millisecondsSinceEpoch;
   }
 
   void resetAll()
@@ -39,7 +61,7 @@ class _SpendState extends State<SpendWidget> {
     account = "Bank A";
     tag = "Unknown";
     note = "YouTube Premium";
-    editingController.text = "";
+    valueEditingController.text = "";
     itemType = ItemType.expense;
   }
 
@@ -84,7 +106,7 @@ class _SpendState extends State<SpendWidget> {
       entry.dateTime = date.millisecondsSinceEpoch;
       entry.accId = 0;
       entry.tagId = tag;
-      entry.value = double.parse(editingController.text);
+      entry.value = double.parse(valueEditingController.text);
 
       if(itemType == ItemType.expense) {
         entry.value *= -1;
@@ -100,7 +122,7 @@ class _SpendState extends State<SpendWidget> {
       entrySpent.dateTime = date.millisecondsSinceEpoch;
       entrySpent.accId = 0; // sending account
       entrySpent.tagId = "Transfer";
-      entrySpent.value = double.parse(editingController.text) * -1;
+      entrySpent.value = double.parse(valueEditingController.text) * -1;
 
       SpendingEntry entryReceive = SpendingEntry();
       entryReceive.itemType = itemType.intVal;
@@ -108,7 +130,7 @@ class _SpendState extends State<SpendWidget> {
       entryReceive.dateTime = date.millisecondsSinceEpoch;
       entryReceive.accId = 0; // receiving account
       entryReceive.tagId = "Transfer";
-      entryReceive.value = double.parse(editingController.text);
+      entryReceive.value = double.parse(valueEditingController.text);
 
       widget.datastore.spendingBox.put(entrySpent);
       widget.datastore.spendingBox.put(entryReceive);
@@ -137,18 +159,30 @@ class _SpendState extends State<SpendWidget> {
                   color: Colors.grey.shade200,
                   borderRadius: const BorderRadius.all(Radius.circular(5)),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      DateFormat('yyyy-MM-dd').format(date),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.black54
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(5.0),
+                  highlightColor: Colors.blue,
+                  onTap: () async {
+                    int newTime = await _selectDate(context, date);
+                    if(newTime != 0) {
+                      setState(() {
+                        date = DateTime.fromMillisecondsSinceEpoch(newTime);
+                      });
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        DateFormat('yyyy-MM-dd').format(date),
+                        style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black54
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                )
               ),
               //************ MONEY AMOUNT ************//
               Container(
@@ -159,9 +193,9 @@ class _SpendState extends State<SpendWidget> {
                   children: [
                     const Spacer(),
                     Text(
-                      editingController.text.isEmpty
+                      valueEditingController.text.isEmpty
                           ? "0"
-                          : editingController.text,
+                          : valueEditingController.text,
                       style: const TextStyle(fontSize: 46),
                     ),
                     const Spacer(),
@@ -291,7 +325,7 @@ class _SpendState extends State<SpendWidget> {
                   )),
               //************ Keyboard ************//
               Center(
-                child: customKeyboard(editingController, textLimit, null),
+                child: customKeyboard(valueEditingController, textLimit, null),
               )
             ],
           ),

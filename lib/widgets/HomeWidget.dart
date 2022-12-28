@@ -92,7 +92,11 @@ class _HomeState extends State<HomeWidget> {
                       ),
                       label: "Calendar"),
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.insert_chart_outlined), label: "1"),
+                      icon: Icon(
+                        CarbonIcons.chart_combo_stacked,
+                        size: 32,
+                      ),
+                      label: "Analyze"),
                   BottomNavigationBarItem(
                       icon: Icon(Icons.calendar_today), label: "1"),
                   BottomNavigationBarItem(

@@ -24,37 +24,54 @@ extension StringExtension on String {
 
 class _CalendarState extends State<CalendarWidget> {
   List<SpendingEntry> entryList = [];
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   void initState() {
     entryList = widget.datastore.spendingList;
-    print(entryList.length);
     super.initState();
   }
 
+  List<SpendingEntry> _getSpendingCount(DateTime day) {
+    List<SpendingEntry> s = widget.datastore.spendingList
+        .where((i) =>
+            (isSameDay(day, DateTime.fromMillisecondsSinceEpoch(i.dateTime))))
+        .toList();
+    return s;
+  }
+
   List<Widget> spendingHistory() {
-    List<Widget> historyList = [];
+    if (entryList.isEmpty) {
+      return [
+        Container(
+            margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+            child: const Center(child: Text("No record found")))
+      ];
+    }
+    List<Widget> historyList = [
+      SizedBox(
+        height: 20,
+      )
+    ];
     List<SpendingEntry> tmpList = [];
     double daySum = 0;
 
-    entryList.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    entryList.sort((a, b) => b.dateTime.compareTo(a.dateTime));
     DateTime currentDate =
         DateTime.fromMillisecondsSinceEpoch(entryList[0].dateTime);
     String currentDay = DateFormat('yyyy-MM-dd').format(currentDate);
-
-    for (int i = 0; i < entryList.length; i++) {
-      SpendingEntry entry = entryList[i];
+    SpendingEntry entry = entryList[0];
+    for (int i = 0; i <= entryList.length; i++) {
+      if (i != entryList.length) {
+        entry = entryList[i];
+      }
       DateTime entryDate = DateTime.fromMillisecondsSinceEpoch(entry.dateTime);
       String entryDay = DateFormat('yyyy-MM-dd').format(entryDate);
-
-      if (entryDay != currentDay || i == entryList.length - 1) {
-        if (i == entryList.length - 1) {
-          tmpList.add(entry);
-        }
-
+      if (entryDay != currentDay || i == entryList.length) {
         historyList.add(Container(
           margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
-          height: 50,
+          height: 40,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -77,8 +94,10 @@ class _CalendarState extends State<CalendarWidget> {
 
         historyList.add(const Divider(
           indent: 10,
+          thickness: 1.0,
           endIndent: 10,
-          color: Colors.black87,
+          height: 10,
+          color: Colors.black,
         ));
 
         for (SpendingEntry item in tmpList) {
@@ -88,11 +107,12 @@ class _CalendarState extends State<CalendarWidget> {
                 visualDensity: VisualDensity(vertical: -2),
                 dense: false,
                 leading: Icon(CarbonIcons.arrows_horizontal),
-                title: Text(item.caption,
+                title: Text(
+                  item.caption,
                   style: GoogleFonts.lato(
                       textStyle: const TextStyle(
-                        fontSize: 16,
-                      )),
+                    fontSize: 16,
+                  )),
                 ),
                 subtitle: Text(item.itemType.toString()),
                 trailing: Text(
@@ -135,9 +155,24 @@ class _CalendarState extends State<CalendarWidget> {
                 TableCalendar(
                   firstDay: DateTime.utc(2010, 10, 16),
                   lastDay: DateTime.utc(2030, 3, 14),
-                  focusedDay: DateTime.now(),
+                  focusedDay: _focusedDay,
                   calendarFormat: CalendarFormat.week,
                   headerStyle: const HeaderStyle(formatButtonVisible: false),
+                  selectedDayPredicate: (day) {
+                    return isSameDay(_selectedDay, day);
+                  },
+                  onDaySelected: (selectedDay, focusedDay) {
+                    if (!isSameDay(_selectedDay, selectedDay)) {
+                      // Call `setState()` when updating the selected day
+                      setState(() {
+                        _selectedDay = selectedDay;
+                        _focusedDay = focusedDay;
+                      });
+                    }
+                  },
+                  eventLoader: (day) {
+                    return _getSpendingCount(day);
+                  },
                 ),
                 Expanded(
                   child: SingleChildScrollView(
