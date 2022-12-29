@@ -2,6 +2,7 @@ import 'package:carbon_icons/carbon_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -26,9 +27,10 @@ extension StringExtension on String {
 class _CalendarState extends State<CalendarWidget> {
   Map<int, Color> itemTypeColor = {
     ItemType.income.intVal: Colors.blue,
-    ItemType.transfer.intVal: Colors.black45,
     ItemType.expense.intVal: Colors.black,
   };
+
+  Map<int, String> AccIdString = {};
 
   List<SpendingEntry> entryList = [];
   DateTime _focusedDay = DateTime.now();
@@ -37,6 +39,11 @@ class _CalendarState extends State<CalendarWidget> {
   @override
   void initState() {
     entryList = widget.datastore.spendingList;
+    for(AccountEntry entry in widget.datastore.accountList)
+      {
+        AccIdString[entry.id] = entry.caption;
+      }
+
     super.initState();
   }
 
@@ -48,7 +55,7 @@ class _CalendarState extends State<CalendarWidget> {
     return s;
   }
 
-  Widget moneyText(double amount, int itemType)
+  Widget moneyText(double amount, int itemType, bool excluded)
   {
     String text = amount.toString();
     if(amount > 0) {
@@ -58,7 +65,7 @@ class _CalendarState extends State<CalendarWidget> {
       style: GoogleFonts.lato(
           textStyle: TextStyle(
               fontSize: 16,
-              color: itemTypeColor[itemType],
+              color: excluded ? Colors.black45 : itemTypeColor[itemType],
               fontWeight: FontWeight.w500
           )),
     );
@@ -130,11 +137,11 @@ class _CalendarState extends State<CalendarWidget> {
           if(item.itemType == ItemType.transfer.intVal) // Receive Entry
           {
             historyList.add(Container(
-                margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
+                margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                 child: ListTile(
-                    visualDensity: VisualDensity(vertical: -2),
+                    visualDensity: const VisualDensity(vertical: -2),
                     dense: false,
-                    leading: Icon(CarbonIcons.arrows_horizontal),
+                    leading: const Icon(CarbonIcons.arrows_horizontal),
                     title: Text(
                       item.caption,
                       style: GoogleFonts.lato(
@@ -142,8 +149,8 @@ class _CalendarState extends State<CalendarWidget> {
                             fontSize: 16,
                           )),
                     ),
-                    subtitle: Text(item.recAccId.toString()),
-                    trailing: moneyText(item.value * -1, item.itemType)
+                    subtitle: Text(AccIdString[item.recAccId]!),
+                    trailing: moneyText(item.value * -1, item.itemType, item.excludeFromSum)
                 )));
           }
           historyList.add(Container(
@@ -159,8 +166,8 @@ class _CalendarState extends State<CalendarWidget> {
                     fontSize: 16,
                   )),
                 ),
-                subtitle: Text(item.accId.toString()),
-                trailing: moneyText(item.value, item.itemType)
+                subtitle: Text(AccIdString[item.accId]!),
+                trailing: moneyText(item.value, item.itemType, item.excludeFromSum)
               )));
         }
 

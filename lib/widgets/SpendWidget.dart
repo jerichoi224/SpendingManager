@@ -7,6 +7,7 @@ import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/enum.dart';
 import 'package:spending_manager/widgets/components/keyboardWidget.dart';
+import 'package:spending_manager/widgets/components/selectFromListPopup.dart';
 
 class SpendWidget extends StatefulWidget {
   final Datastore datastore;
@@ -43,11 +44,23 @@ class _SpendState extends State<SpendWidget> {
     });
   }
 
-  showSnackBar(BuildContext context, String s){
+  showSnackBar(BuildContext context, String s) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(s),
       duration: Duration(seconds: 3),
     ));
+  }
+
+  void resetAll() {
+    account = AccountList[0];
+    accountRec = AccountList[0];
+    if (AccountList.length > 1) {
+      accountRec = AccountList[1];
+    }
+    tag = CategoryList[0];
+    valueEditingController.text = "";
+    noteEditingController.text = "";
+    itemType = ItemType.expense;
   }
 
   Future<int> _selectDate(BuildContext context, DateTime dateTime) async {
@@ -70,17 +83,6 @@ class _SpendState extends State<SpendWidget> {
     return picked.millisecondsSinceEpoch;
   }
 
-  void resetAll() {
-   account = AccountList[0];
-   accountRec = AccountList[0];
-   if(AccountList.length > 1) {
-     accountRec = AccountList[1];
-   }
-   tag = CategoryList[0];
-   valueEditingController.text = "";
-   itemType = ItemType.expense;
-  }
-
   Widget toggleButton(String caption) {
     return Expanded(
       child: Container(
@@ -98,16 +100,14 @@ class _SpendState extends State<SpendWidget> {
                 borderRadius: BorderRadius.circular(10.0),
                 highlightColor: Colors.blue,
                 onTap: () {
-                  if(caption == "Transfer" && AccountList.length < 2)
-                    {
-                      showSnackBar(context, "You cannot Transfer with less than 2 accounts");
-                    }
-                  else
-                    {
-                      setState(() {
-                        itemType = ItemType.values.byName(caption.toLowerCase());
-                      });
-                    }
+                  if (caption == "Transfer" && AccountList.length < 2) {
+                    showSnackBar(context,
+                        "You cannot Transfer with less than 2 accounts");
+                  } else {
+                    setState(() {
+                      itemType = ItemType.values.byName(caption.toLowerCase());
+                    });
+                  }
                 },
                 child: Center(
                   child: Text(
@@ -119,18 +119,38 @@ class _SpendState extends State<SpendWidget> {
     );
   }
 
+  Future<String> selectFromList(BuildContext context, List<String> list) async {
+    final result = await selectFromListPopup(context, list);
+    if (result != null) {
+      return result;
+    }
+    return "";
+  }
+
   void saveItem() {
-    if(valueEditingController.text.isEmpty)
+    if (valueEditingController.text.isEmpty) {
+      showSnackBar(context, "Must enter a value");
+      return;
+    }
+
+    if (noteEditingController.text.isEmpty) {
       {
+        showSnackBar(context, "Please Enter Note");
         return;
       }
+    }
+
+    if (itemType == ItemType.transfer) {
+      showSnackBar(context, "Cannot Transfer to Same Account");
+      return;
+    }
 
     if (itemType != ItemType.transfer) {
       SpendingEntry entry = SpendingEntry();
       entry.itemType = itemType.intVal;
       entry.caption = noteEditingController.text;
       entry.dateTime = date.millisecondsSinceEpoch;
-      entry.accId = 0;
+      entry.accId = account.id;
       entry.tagId = tag.id;
       entry.value = double.parse(valueEditingController.text);
 
@@ -144,9 +164,10 @@ class _SpendState extends State<SpendWidget> {
       entry.itemType = itemType.intVal;
       entry.caption = noteEditingController.text;
       entry.dateTime = date.millisecondsSinceEpoch;
-      entry.accId = 0; // sending account
-      entry.recAccId = 0; // receive account
-      entry.tagId = CategoryList.firstWhere((e)=>e.caption == "Transfer").id;
+      entry.accId = account.id; // sending account
+      entry.recAccId = accountRec.id; // receive account
+      entry.excludeFromSum = true;
+      entry.tagId = CategoryList.firstWhere((e) => e.caption == "Transfer").id;
       entry.value = double.parse(valueEditingController.text) * -1;
       widget.datastore.spendingBox.put(entry);
     }
@@ -159,210 +180,258 @@ class _SpendState extends State<SpendWidget> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.white,
-        body: SingleChildScrollView(
-            child:Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height - 64, // 64 = bottomnavbar
-            child:Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Spacer(),
-                //************ DATE ************//
-                Container(
-                    height: 30,
-                    width: 120,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: const BorderRadius.all(Radius.circular(5)),
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(5.0),
-                      highlightColor: Colors.blue,
-                      onTap: () async {
-                        int newTime = await _selectDate(context, date);
-                        if (newTime != 0) {
-                          setState(() {
-                            date = DateTime.fromMillisecondsSinceEpoch(newTime);
-                          });
-                        }
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            DateFormat('yyyy-MM-dd').format(date),
-                            style: const TextStyle(
-                                fontSize: 16, color: Colors.black54),
-                          ),
-                        ],
-                      ),
-                    )),
-                //************ MONEY AMOUNT ************//
-                Container(
-                  height: 80,
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-                  child: Row(
-                    children: [
-                      const Spacer(),
-                      Text(
-                        valueEditingController.text.isEmpty
-                            ? "0"
-                            : valueEditingController.text,
-                        style: const TextStyle(fontSize: 46),
-                      ),
-                      const Spacer(),
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    //************ ACCOUNT ************//
-                    Expanded(
-                      child: Container(
-                        height: 40,
-                        margin: const EdgeInsets.fromLTRB(30, 0, 5, 5),
-                        padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius:
-                          const BorderRadius.all(Radius.circular(15)),
-                        ),
-                        child: InkWell(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            backgroundColor: Colors.white,
+            body: SingleChildScrollView(
+                child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height -
+                        64, // 64 = bottomnavbar
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Spacer(),
+                        //************ DATE ************//
+                        Container(
+                            height: 30,
+                            width: 120,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(5)),
+                            ),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(5.0),
+                              highlightColor: Colors.blue,
+                              onTap: () async {
+                                int newTime = await _selectDate(context, date);
+                                if (newTime != 0) {
+                                  setState(() {
+                                    date = DateTime.fromMillisecondsSinceEpoch(
+                                        newTime);
+                                  });
+                                }
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    DateFormat('yyyy-MM-dd').format(date),
+                                    style: const TextStyle(
+                                        fontSize: 16, color: Colors.black54),
+                                  ),
+                                ],
+                              ),
+                            )),
+                        //************ MONEY AMOUNT ************//
+                        Container(
+                          height: 80,
+                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                          margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
                           child: Row(
                             children: [
-                              Icon(
-                                itemType.string == "transfer"
-                                    ? CarbonIcons.logout
-                                    : CarbonIcons.account,
-                                color: Colors.black54,
-                              ),
                               const Spacer(),
                               Text(
-                                account.caption,
-                                style: TextStyle(fontSize: 16),
+                                valueEditingController.text.isEmpty
+                                    ? "0"
+                                    : valueEditingController.text,
+                                style: const TextStyle(fontSize: 46),
                               ),
+                              const Spacer(),
                             ],
                           ),
-                        )
-                      ),
-                    ),
-                    //************ CATEGORY ************//
-                    Expanded(
-                      child: Container(
-                        height: 40,
-                        margin: const EdgeInsets.fromLTRB(5, 0, 30, 5),
-                        padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius:
-                          const BorderRadius.all(Radius.circular(15)),
                         ),
-                        child: Row(
+                        Row(
                           children: [
-                            Icon(
-                              itemType.string == "transfer"
-                                  ? CarbonIcons.login
-                                  : CarbonIcons.tag,
-                              color: Colors.black54,
+                            //************ ACCOUNT ************//
+                            Expanded(
+                              child: Container(
+                                  height: 40,
+                                  margin:
+                                      const EdgeInsets.fromLTRB(30, 0, 5, 5),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade200,
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(15)),
+                                  ),
+                                  child: InkWell(
+                                    onTap: () async {
+                                      String newAccount = await selectFromList(
+                                          context,
+                                          AccountList.map((e) => e.caption)
+                                              .toList());
+                                      if (newAccount.isNotEmpty) {
+                                        setState(() {
+                                          account = AccountList.firstWhere(
+                                              (element) =>
+                                                  element.caption ==
+                                                  newAccount);
+                                        });
+                                      }
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          itemType.string == "transfer"
+                                              ? CarbonIcons.logout
+                                              : CarbonIcons.account,
+                                          color: Colors.black54,
+                                        ),
+                                        const Spacer(),
+                                        Text(
+                                          account.caption,
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                      ],
+                                    ),
+                                  )),
                             ),
-                            const Spacer(),
-                            Text(
-                                itemType.string == "transfer"
-                                  ? accountRec.caption
-                                  : tag.caption,
-                              style: TextStyle(fontSize: 16),
+                            //************ CATEGORY ************//
+                            Expanded(
+                              child: Container(
+                                  height: 40,
+                                  margin:
+                                      const EdgeInsets.fromLTRB(5, 0, 30, 5),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade200,
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(15)),
+                                  ),
+                                  child: InkWell(
+                                    onTap: () async {
+                                      if (itemType.string != "transfer") {
+                                        String newAccount =
+                                            await selectFromList(
+                                                context,
+                                                CategoryList.map(
+                                                    (e) => e.caption).toList());
+                                        if (newAccount.isNotEmpty) {
+                                          setState(() {
+                                            tag = CategoryList.firstWhere(
+                                                (element) =>
+                                                    element.caption ==
+                                                    newAccount);
+                                          });
+                                        }
+                                      } else {
+                                        String newAccount =
+                                            await selectFromList(
+                                                context,
+                                                AccountList.map(
+                                                    (e) => e.caption).toList());
+                                        if (newAccount.isNotEmpty) {
+                                          setState(() {
+                                            accountRec = AccountList.firstWhere(
+                                                (element) =>
+                                                    element.caption ==
+                                                    newAccount);
+                                          });
+                                        }
+                                      }
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          itemType.string == "transfer"
+                                              ? CarbonIcons.login
+                                              : CarbonIcons.tag,
+                                          color: Colors.black54,
+                                        ),
+                                        const Spacer(),
+                                        Text(
+                                          itemType.string == "transfer"
+                                              ? accountRec.caption
+                                              : tag.caption,
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                      ],
+                                    ),
+                                  )),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                //************ NOTE ************//
-                Container(
-                  height: 40,
-                  margin: const EdgeInsets.fromLTRB(30, 0, 30, 5),
-                  padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: const BorderRadius.all(Radius.circular(15)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        CarbonIcons.catalog,
-                        color: Colors.black54,
-                      ),
-                      Flexible(
-                        child: TextField(
-                          decoration: const InputDecoration(
-                            hintText: 'Enter Note',
-                            border: InputBorder.none
+                        //************ NOTE ************//
+                        Container(
+                          height: 40,
+                          margin: const EdgeInsets.fromLTRB(30, 0, 30, 5),
+                          padding: const EdgeInsets.fromLTRB(15, 0, 20, 0),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(15)),
                           ),
-                          textAlign: TextAlign.end,
-                          controller: noteEditingController,
-                          style: const TextStyle(
-                              fontSize: 16
+                          child: Row(
+                            children: [
+                              const Icon(
+                                CarbonIcons.catalog,
+                                color: Colors.black54,
+                              ),
+                              Flexible(
+                                child: TextField(
+                                  decoration: const InputDecoration(
+                                      hintText: 'Enter Note',
+                                      border: InputBorder.none),
+                                  textAlign: TextAlign.end,
+                                  controller: noteEditingController,
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              )
+                            ],
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                ),
-                //************ Three Toggles ************//
-                Container(
-                  margin: const EdgeInsets.fromLTRB(28, 0, 28, 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      toggleButton("Income"),
-                      toggleButton("Transfer"),
-                      toggleButton("Expense"),
-                    ],
-                  ),
-                ),
-                //************ Enter Button ************//
-                Container(
-                    height: 60,
-                    margin: const EdgeInsets.fromLTRB(30, 0, 30, 5),
-                    child: Ink(
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade400,
-                        borderRadius:
-                        const BorderRadius.all(Radius.circular(10)),
-                      ),
-                      child: InkWell(
-                          borderRadius: BorderRadius.circular(10.0),
-                          highlightColor: Colors.blue,
-                          onTap: () {
-                            saveItem();
-                            setState(() {});
-                          },
-                          child: const Center(
-                            child: Text(
-                              "Enter",
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          )),
-                    )),
-                //************ Keyboard ************//
-                Center(
-                  child:
-                  customKeyboard(valueEditingController, textLimit, null),
-                )
-              ],
-            )
-          )
-        )
-      )
-    );
+                        //************ Three Toggles ************//
+                        Container(
+                          margin: const EdgeInsets.fromLTRB(28, 0, 28, 5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              toggleButton("Income"),
+                              toggleButton("Transfer"),
+                              toggleButton("Expense"),
+                            ],
+                          ),
+                        ),
+                        //************ Enter Button ************//
+                        Container(
+                            height: 60,
+                            margin: const EdgeInsets.fromLTRB(30, 0, 30, 5),
+                            child: Ink(
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade400,
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(10)),
+                              ),
+                              child: InkWell(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  highlightColor: Colors.blue,
+                                  onTap: () {
+                                    saveItem();
+                                    FocusManager.instance.primaryFocus
+                                        ?.unfocus();
+                                    setState(() {});
+                                  },
+                                  child: const Center(
+                                    child: Text(
+                                      "Enter",
+                                      style: TextStyle(fontSize: 24),
+                                    ),
+                                  )),
+                            )),
+                        //************ Keyboard ************//
+                        Center(
+                          child: customKeyboard(
+                              valueEditingController, textLimit, null),
+                        )
+                      ],
+                    )))));
   }
 }

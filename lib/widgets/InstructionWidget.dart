@@ -50,6 +50,9 @@ class _InstructionState extends State<InstructionWidget>{
       widget.datastore.categoryBox.put(CategoryEntry(caption: "Food", iconId: 1));
       widget.datastore.categoryBox.put(CategoryEntry(caption: "Cafe", iconId: 1));
       widget.datastore.categoryBox.put(CategoryEntry(caption: "Transportation", iconId: 1));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Subscription", iconId: 1));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Shopping", iconId: 1));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Hobby", iconId: 1));
       widget.datastore.categoryBox.put(CategoryEntry(caption: "Medical", iconId: 1));
       widget.datastore.categoryList = widget.datastore.categoryBox.getAll();
 

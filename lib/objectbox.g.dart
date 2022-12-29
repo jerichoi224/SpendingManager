@@ -24,7 +24,7 @@ final _entities = <ModelEntity>[
   ModelEntity(
       id: const IdUid(1, 8560210450077052426),
       name: 'SpendingEntry',
-      lastPropertyId: const IdUid(10, 2695665378395874140),
+      lastPropertyId: const IdUid(11, 8425197643574923808),
       flags: 0,
       properties: <ModelProperty>[
         ModelProperty(
@@ -66,6 +66,11 @@ final _entities = <ModelEntity>[
             id: const IdUid(10, 2695665378395874140),
             name: 'recAccId',
             type: 6,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(11, 8425197643574923808),
+            name: 'excludeFromSum',
+            type: 1,
             flags: 0)
       ],
       relations: <ModelRelation>[],
@@ -158,7 +163,7 @@ ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (SpendingEntry object, fb.Builder fbb) {
           final captionOffset = fbb.writeString(object.caption);
-          fbb.startTable(11);
+          fbb.startTable(12);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, captionOffset);
           fbb.addFloat64(2, object.value);
@@ -167,6 +172,7 @@ ModelDefinition getObjectBoxModel() {
           fbb.addInt64(7, object.itemType);
           fbb.addInt64(8, object.accId);
           fbb.addInt64(9, object.recAccId);
+          fbb.addBool(10, object.excludeFromSum);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -189,7 +195,9 @@ ModelDefinition getObjectBoxModel() {
             ..accId =
                 const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0)
             ..recAccId =
-                const fb.Int64Reader().vTableGet(buffer, rootOffset, 22, 0);
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 22, 0)
+            ..excludeFromSum =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 24, false);
 
           return object;
         }),
@@ -288,6 +296,10 @@ class SpendingEntry_ {
   /// see [SpendingEntry.recAccId]
   static final recAccId =
       QueryIntegerProperty<SpendingEntry>(_entities[0].properties[7]);
+
+  /// see [SpendingEntry.excludeFromSum]
+  static final excludeFromSum =
+      QueryBooleanProperty<SpendingEntry>(_entities[0].properties[8]);
 }
 
 /// [AccountEntry] entity fields to define ObjectBox queries.

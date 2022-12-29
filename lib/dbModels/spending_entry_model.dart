@@ -9,5 +9,6 @@ class SpendingEntry {
   int recAccId = -1;
   int tagId = -1;
   String caption = "";
+  bool excludeFromSum = false;
   int itemType = -1;
 }
