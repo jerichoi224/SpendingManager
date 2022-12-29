@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:8560210450077052426",
-      "lastPropertyId": "9:5087545426494177644",
+      "lastPropertyId": "10:2695665378395874140",
       "name": "SpendingEntry",
       "properties": [
         {
@@ -32,7 +32,7 @@
         {
           "id": "7:1459171979900264546",
           "name": "tagId",
-          "type": 9
+          "type": 6
         },
         {
           "id": "8:491636686344489777",
@@ -43,12 +43,60 @@
           "id": "9:5087545426494177644",
           "name": "accId",
           "type": 6
+        },
+        {
+          "id": "10:2695665378395874140",
+          "name": "recAccId",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:4628037891868379992",
+      "lastPropertyId": "2:862177462193124388",
+      "name": "AccountEntry",
+      "properties": [
+        {
+          "id": "1:4548300855998218223",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:862177462193124388",
+          "name": "caption",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:6876147056865672656",
+      "lastPropertyId": "3:3574373731886766926",
+      "name": "CategoryEntry",
+      "properties": [
+        {
+          "id": "1:7398582131714520346",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7498253641532519877",
+          "name": "caption",
+          "type": 9
+        },
+        {
+          "id": "3:3574373731886766926",
+          "name": "iconId",
+          "type": 6
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "1:8560210450077052426",
+  "lastEntityId": "3:6876147056865672656",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",

@@ -41,7 +41,7 @@ class _HomeState extends State<HomeWidget> {
 
   List<Widget> _children() => [
         SpendWidget(datastore: widget.datastore),
-      CalendarWidget(datastore: widget.datastore),
+        CalendarWidget(datastore: widget.datastore),
         RoutineWidget(datastore: widget.datastore),
         DashboardWidget(datastore: widget.datastore),
         SettingsWidget(datastore: widget.datastore),

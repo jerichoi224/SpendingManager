@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:spending_manager/dbModels/categoryEntry.dart';
+import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/main.dart';
 
 class InstructionWidget extends StatefulWidget {
   final BuildContext parentCtx;
-  late final datastore;
+  final Datastore datastore;
   InstructionWidget({Key? key, required this.parentCtx, required this.datastore});
 
   @override
@@ -37,6 +39,20 @@ class _InstructionState extends State<InstructionWidget>{
 
   finishSplash() async {
       nextPage();
+
+      widget.datastore.accountBox.put(AccountEntry(caption: "KB Checking"));
+      widget.datastore.accountBox.put(AccountEntry(caption: "Toss Checking"));
+      widget.datastore.accountList = widget.datastore.accountBox.getAll();
+
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Transfer", iconId: 1));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Other", iconId: 1));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Gift", iconId: 1));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Food", iconId: 1));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Cafe", iconId: 1));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Transportation", iconId: 1));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Medical", iconId: 1));
+      widget.datastore.categoryList = widget.datastore.categoryBox.getAll();
+
       widget.datastore.setPref('show_instruction', false);
       await Future.delayed(const Duration(seconds: 2), (){});
       Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);

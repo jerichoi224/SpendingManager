@@ -6,7 +6,8 @@ class SpendingEntry {
   int dateTime = -1;
   double value = 0;
   int accId = -1;
-  String tagId = "";
+  int recAccId = -1;
+  int tagId = -1;
   String caption = "";
   int itemType = -1;
 }

@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:spending_manager/dbModels/categoryEntry.dart';
+import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/objectbox.g.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,8 +15,13 @@ class Datastore {
   late Store store;
   late final SharedPreferences prefs;
   Map<String, dynamic> prefMap = {};
+
   late Box<SpendingEntry> spendingBox;
   List<SpendingEntry> spendingList = [];
+  late Box<CategoryEntry> categoryBox;
+  List<CategoryEntry> categoryList = [];
+  late Box<AccountEntry> accountBox;
+  List<AccountEntry> accountList = [];
 
   Datastore._create(this.store, this.prefs) {
     initObjectBox();
@@ -24,6 +31,10 @@ class Datastore {
   {
     spendingBox = Box<SpendingEntry>(store);
     spendingList = spendingBox.getAll();
+    categoryBox = Box<CategoryEntry>(store);
+    categoryList = categoryBox.getAll();
+    accountBox = Box<AccountEntry>(store);
+    accountList = accountBox.getAll();
 
     for(String key in prefs.getKeys()) {
       prefMap[key] = prefs.get(key);

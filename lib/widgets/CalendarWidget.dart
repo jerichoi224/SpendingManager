@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:spending_manager/util/enum.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarWidget extends StatefulWidget {
@@ -23,6 +24,12 @@ extension StringExtension on String {
 }
 
 class _CalendarState extends State<CalendarWidget> {
+  Map<int, Color> itemTypeColor = {
+    ItemType.income.intVal: Colors.blue,
+    ItemType.transfer.intVal: Colors.black45,
+    ItemType.expense.intVal: Colors.black,
+  };
+
   List<SpendingEntry> entryList = [];
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -41,6 +48,22 @@ class _CalendarState extends State<CalendarWidget> {
     return s;
   }
 
+  Widget moneyText(double amount, int itemType)
+  {
+    String text = amount.toString();
+    if(amount > 0) {
+      text = "+$text";
+    }
+    return Text(text,
+      style: GoogleFonts.lato(
+          textStyle: TextStyle(
+              fontSize: 16,
+              color: itemTypeColor[itemType],
+              fontWeight: FontWeight.w500
+          )),
+    );
+  }
+
   List<Widget> spendingHistory() {
     if (entryList.isEmpty) {
       return [
@@ -49,13 +72,15 @@ class _CalendarState extends State<CalendarWidget> {
             child: const Center(child: Text("No record found")))
       ];
     }
+
     List<Widget> historyList = [
       SizedBox(
         height: 20,
       )
     ];
     List<SpendingEntry> tmpList = [];
-    double daySum = 0;
+    double dayExpense = 0;
+    double dayIncome = 0;
 
     entryList.sort((a, b) => b.dateTime.compareTo(a.dateTime));
     DateTime currentDate =
@@ -77,16 +102,17 @@ class _CalendarState extends State<CalendarWidget> {
             children: [
               Text(
                 DateFormat('MMM d, EEE').format(currentDate),
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontSize: 16,
+                ),
               ),
               const Spacer(),
               Text(
-                daySum.toString(),
+                dayExpense.toString(),
                 style: GoogleFonts.lato(
                     textStyle: const TextStyle(
-                  fontSize: 16,
-                )),
+                        fontSize: 16, fontWeight: FontWeight.w600)),
               )
             ],
           ),
@@ -94,13 +120,32 @@ class _CalendarState extends State<CalendarWidget> {
 
         historyList.add(const Divider(
           indent: 10,
-          thickness: 1.0,
           endIndent: 10,
           height: 10,
-          color: Colors.black,
+          thickness: 0.7,
+          color: Colors.black54,
         ));
 
         for (SpendingEntry item in tmpList) {
+          if(item.itemType == ItemType.transfer.intVal) // Receive Entry
+          {
+            historyList.add(Container(
+                margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
+                child: ListTile(
+                    visualDensity: VisualDensity(vertical: -2),
+                    dense: false,
+                    leading: Icon(CarbonIcons.arrows_horizontal),
+                    title: Text(
+                      item.caption,
+                      style: GoogleFonts.lato(
+                          textStyle: const TextStyle(
+                            fontSize: 16,
+                          )),
+                    ),
+                    subtitle: Text(item.recAccId.toString()),
+                    trailing: moneyText(item.value * -1, item.itemType)
+                )));
+          }
           historyList.add(Container(
               margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
               child: ListTile(
@@ -114,24 +159,24 @@ class _CalendarState extends State<CalendarWidget> {
                     fontSize: 16,
                   )),
                 ),
-                subtitle: Text(item.itemType.toString()),
-                trailing: Text(
-                  item.value.toString(),
-                  style: GoogleFonts.lato(
-                      textStyle: const TextStyle(
-                    fontSize: 16,
-                  )),
-                ),
+                subtitle: Text(item.accId.toString()),
+                trailing: moneyText(item.value, item.itemType)
               )));
         }
 
         currentDay = entryDay;
         currentDate = entryDate;
         tmpList.clear();
-        daySum = 0;
+        dayExpense = 0;
+        dayIncome = 0;
       }
 
-      daySum += entry.value;
+      if(entry.itemType == ItemType.expense.intVal) {
+        dayExpense += entry.value;
+      }
+      if(entry.itemType == ItemType.income.intVal) {
+        dayIncome += entry.value;
+      }
       tmpList.add(entry);
     }
 
@@ -143,8 +188,9 @@ class _CalendarState extends State<CalendarWidget> {
     return GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
+          backgroundColor: Colors.white,
             appBar: AppBar(
-                backgroundColor: Colors.transparent,
+                backgroundColor: Colors.white,
                 elevation: 0,
                 title: const Text(
                   "Calendar Timeline",
@@ -174,10 +220,17 @@ class _CalendarState extends State<CalendarWidget> {
                     return _getSpendingCount(day);
                   },
                 ),
+                Container(
+                  margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  height: 10,
+                  color: Colors.grey.shade100,
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
-                    child: Column(
+                    child: ListView(
+                      primary: false,
+                      shrinkWrap: true,
                       children: spendingHistory(),
                     ),
                   ),

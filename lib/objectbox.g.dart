@@ -14,6 +14,8 @@ import 'package:objectbox/internal.dart'; // generated code can access "internal
 import 'package:objectbox/objectbox.dart';
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
+import 'dbModels/accountEntry.dart';
+import 'dbModels/categoryEntry.dart';
 import 'dbModels/spending_entry_model.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
@@ -22,7 +24,7 @@ final _entities = <ModelEntity>[
   ModelEntity(
       id: const IdUid(1, 8560210450077052426),
       name: 'SpendingEntry',
-      lastPropertyId: const IdUid(9, 5087545426494177644),
+      lastPropertyId: const IdUid(10, 2695665378395874140),
       flags: 0,
       properties: <ModelProperty>[
         ModelProperty(
@@ -48,7 +50,7 @@ final _entities = <ModelEntity>[
         ModelProperty(
             id: const IdUid(7, 1459171979900264546),
             name: 'tagId',
-            type: 9,
+            type: 6,
             flags: 0),
         ModelProperty(
             id: const IdUid(8, 491636686344489777),
@@ -58,6 +60,54 @@ final _entities = <ModelEntity>[
         ModelProperty(
             id: const IdUid(9, 5087545426494177644),
             name: 'accId',
+            type: 6,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(10, 2695665378395874140),
+            name: 'recAccId',
+            type: 6,
+            flags: 0)
+      ],
+      relations: <ModelRelation>[],
+      backlinks: <ModelBacklink>[]),
+  ModelEntity(
+      id: const IdUid(2, 4628037891868379992),
+      name: 'AccountEntry',
+      lastPropertyId: const IdUid(2, 862177462193124388),
+      flags: 0,
+      properties: <ModelProperty>[
+        ModelProperty(
+            id: const IdUid(1, 4548300855998218223),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        ModelProperty(
+            id: const IdUid(2, 862177462193124388),
+            name: 'caption',
+            type: 9,
+            flags: 0)
+      ],
+      relations: <ModelRelation>[],
+      backlinks: <ModelBacklink>[]),
+  ModelEntity(
+      id: const IdUid(3, 6876147056865672656),
+      name: 'CategoryEntry',
+      lastPropertyId: const IdUid(3, 3574373731886766926),
+      flags: 0,
+      properties: <ModelProperty>[
+        ModelProperty(
+            id: const IdUid(1, 7398582131714520346),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        ModelProperty(
+            id: const IdUid(2, 7498253641532519877),
+            name: 'caption',
+            type: 9,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(3, 3574373731886766926),
+            name: 'iconId',
             type: 6,
             flags: 0)
       ],
@@ -85,7 +135,7 @@ Future<Store> openStore(
 ModelDefinition getObjectBoxModel() {
   final model = ModelInfo(
       entities: _entities,
-      lastEntityId: const IdUid(1, 8560210450077052426),
+      lastEntityId: const IdUid(3, 6876147056865672656),
       lastIndexId: const IdUid(0, 0),
       lastRelationId: const IdUid(0, 0),
       lastSequenceId: const IdUid(0, 0),
@@ -108,15 +158,15 @@ ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (SpendingEntry object, fb.Builder fbb) {
           final captionOffset = fbb.writeString(object.caption);
-          final tagIdOffset = fbb.writeString(object.tagId);
-          fbb.startTable(10);
+          fbb.startTable(11);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, captionOffset);
           fbb.addFloat64(2, object.value);
           fbb.addInt64(3, object.dateTime);
-          fbb.addOffset(6, tagIdOffset);
+          fbb.addInt64(6, object.tagId);
           fbb.addInt64(7, object.itemType);
           fbb.addInt64(8, object.accId);
+          fbb.addInt64(9, object.recAccId);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -132,12 +182,71 @@ ModelDefinition getObjectBoxModel() {
                 const fb.Float64Reader().vTableGet(buffer, rootOffset, 8, 0)
             ..dateTime =
                 const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0)
-            ..tagId = const fb.StringReader(asciiOptimization: true)
-                .vTableGet(buffer, rootOffset, 16, '')
+            ..tagId =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0)
             ..itemType =
                 const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0)
             ..accId =
-                const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0)
+            ..recAccId =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 22, 0);
+
+          return object;
+        }),
+    AccountEntry: EntityDefinition<AccountEntry>(
+        model: _entities[1],
+        toOneRelations: (AccountEntry object) => [],
+        toManyRelations: (AccountEntry object) => {},
+        getId: (AccountEntry object) => object.id,
+        setId: (AccountEntry object, int id) {
+          object.id = id;
+        },
+        objectToFB: (AccountEntry object, fb.Builder fbb) {
+          final captionOffset = fbb.writeString(object.caption);
+          fbb.startTable(3);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, captionOffset);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+
+          final object = AccountEntry(
+              caption: const fb.StringReader(asciiOptimization: true)
+                  .vTableGet(buffer, rootOffset, 6, ''))
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+
+          return object;
+        }),
+    CategoryEntry: EntityDefinition<CategoryEntry>(
+        model: _entities[2],
+        toOneRelations: (CategoryEntry object) => [],
+        toManyRelations: (CategoryEntry object) => {},
+        getId: (CategoryEntry object) => object.id,
+        setId: (CategoryEntry object, int id) {
+          object.id = id;
+        },
+        objectToFB: (CategoryEntry object, fb.Builder fbb) {
+          final captionOffset = fbb.writeString(object.caption);
+          fbb.startTable(4);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, captionOffset);
+          fbb.addInt64(2, object.iconId);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+
+          final object = CategoryEntry(
+              caption: const fb.StringReader(asciiOptimization: true)
+                  .vTableGet(buffer, rootOffset, 6, ''),
+              iconId:
+                  const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0))
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
 
           return object;
         })
@@ -166,7 +275,7 @@ class SpendingEntry_ {
 
   /// see [SpendingEntry.tagId]
   static final tagId =
-      QueryStringProperty<SpendingEntry>(_entities[0].properties[4]);
+      QueryIntegerProperty<SpendingEntry>(_entities[0].properties[4]);
 
   /// see [SpendingEntry.itemType]
   static final itemType =
@@ -175,4 +284,34 @@ class SpendingEntry_ {
   /// see [SpendingEntry.accId]
   static final accId =
       QueryIntegerProperty<SpendingEntry>(_entities[0].properties[6]);
+
+  /// see [SpendingEntry.recAccId]
+  static final recAccId =
+      QueryIntegerProperty<SpendingEntry>(_entities[0].properties[7]);
+}
+
+/// [AccountEntry] entity fields to define ObjectBox queries.
+class AccountEntry_ {
+  /// see [AccountEntry.id]
+  static final id =
+      QueryIntegerProperty<AccountEntry>(_entities[1].properties[0]);
+
+  /// see [AccountEntry.caption]
+  static final caption =
+      QueryStringProperty<AccountEntry>(_entities[1].properties[1]);
+}
+
+/// [CategoryEntry] entity fields to define ObjectBox queries.
+class CategoryEntry_ {
+  /// see [CategoryEntry.id]
+  static final id =
+      QueryIntegerProperty<CategoryEntry>(_entities[2].properties[0]);
+
+  /// see [CategoryEntry.caption]
+  static final caption =
+      QueryStringProperty<CategoryEntry>(_entities[2].properties[1]);
+
+  /// see [CategoryEntry.iconId]
+  static final iconId =
+      QueryIntegerProperty<CategoryEntry>(_entities[2].properties[2]);
 }
