@@ -9,6 +9,7 @@ class SpendingEntry {
   int recAccId = -1;
   int tagId = -1;
   String caption = "";
-  bool excludeFromSum = false;
+  bool excludeFromSpending = false;
+  bool excludeFromIncome = false;
   int itemType = -1;
 }

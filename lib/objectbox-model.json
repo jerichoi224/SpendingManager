@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:8560210450077052426",
-      "lastPropertyId": "11:8425197643574923808",
+      "lastPropertyId": "13:5435925545126985859",
       "name": "SpendingEntry",
       "properties": [
         {
@@ -50,8 +50,13 @@
           "type": 6
         },
         {
-          "id": "11:8425197643574923808",
-          "name": "excludeFromSum",
+          "id": "12:4336210243650426089",
+          "name": "excludeFromSpending",
+          "type": 1
+        },
+        {
+          "id": "13:5435925545126985859",
+          "name": "excludeFromIncome",
           "type": 1
         }
       ],
@@ -111,7 +116,8 @@
   "retiredIndexUids": [],
   "retiredPropertyUids": [
     5060431788235565225,
-    5741241459831399899
+    5741241459831399899,
+    8425197643574923808
   ],
   "retiredRelationUids": [],
   "version": 1

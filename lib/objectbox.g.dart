@@ -24,7 +24,7 @@ final _entities = <ModelEntity>[
   ModelEntity(
       id: const IdUid(1, 8560210450077052426),
       name: 'SpendingEntry',
-      lastPropertyId: const IdUid(11, 8425197643574923808),
+      lastPropertyId: const IdUid(13, 5435925545126985859),
       flags: 0,
       properties: <ModelProperty>[
         ModelProperty(
@@ -68,8 +68,13 @@ final _entities = <ModelEntity>[
             type: 6,
             flags: 0),
         ModelProperty(
-            id: const IdUid(11, 8425197643574923808),
-            name: 'excludeFromSum',
+            id: const IdUid(12, 4336210243650426089),
+            name: 'excludeFromSpending',
+            type: 1,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(13, 5435925545126985859),
+            name: 'excludeFromIncome',
             type: 1,
             flags: 0)
       ],
@@ -146,7 +151,11 @@ ModelDefinition getObjectBoxModel() {
       lastSequenceId: const IdUid(0, 0),
       retiredEntityUids: const [],
       retiredIndexUids: const [],
-      retiredPropertyUids: const [5060431788235565225, 5741241459831399899],
+      retiredPropertyUids: const [
+        5060431788235565225,
+        5741241459831399899,
+        8425197643574923808
+      ],
       retiredRelationUids: const [],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
@@ -163,7 +172,7 @@ ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (SpendingEntry object, fb.Builder fbb) {
           final captionOffset = fbb.writeString(object.caption);
-          fbb.startTable(12);
+          fbb.startTable(14);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, captionOffset);
           fbb.addFloat64(2, object.value);
@@ -172,7 +181,8 @@ ModelDefinition getObjectBoxModel() {
           fbb.addInt64(7, object.itemType);
           fbb.addInt64(8, object.accId);
           fbb.addInt64(9, object.recAccId);
-          fbb.addBool(10, object.excludeFromSum);
+          fbb.addBool(11, object.excludeFromSpending);
+          fbb.addBool(12, object.excludeFromIncome);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -196,8 +206,10 @@ ModelDefinition getObjectBoxModel() {
                 const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0)
             ..recAccId =
                 const fb.Int64Reader().vTableGet(buffer, rootOffset, 22, 0)
-            ..excludeFromSum =
-                const fb.BoolReader().vTableGet(buffer, rootOffset, 24, false);
+            ..excludeFromSpending =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 26, false)
+            ..excludeFromIncome =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 28, false);
 
           return object;
         }),
@@ -297,9 +309,13 @@ class SpendingEntry_ {
   static final recAccId =
       QueryIntegerProperty<SpendingEntry>(_entities[0].properties[7]);
 
-  /// see [SpendingEntry.excludeFromSum]
-  static final excludeFromSum =
+  /// see [SpendingEntry.excludeFromSpending]
+  static final excludeFromSpending =
       QueryBooleanProperty<SpendingEntry>(_entities[0].properties[8]);
+
+  /// see [SpendingEntry.excludeFromIncome]
+  static final excludeFromIncome =
+      QueryBooleanProperty<SpendingEntry>(_entities[0].properties[9]);
 }
 
 /// [AccountEntry] entity fields to define ObjectBox queries.

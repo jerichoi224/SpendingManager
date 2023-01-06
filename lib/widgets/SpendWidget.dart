@@ -30,16 +30,17 @@ class _SpendState extends State<SpendWidget> {
   int textLimit = 10;
   DateTime date = DateTime.now();
 
-  List<CategoryEntry> CategoryList = [];
-  List<AccountEntry> AccountList = [];
+  List<CategoryEntry> categoryList = [];
+  List<AccountEntry> accountList = [];
 
   @override
   void initState() {
     super.initState();
-    CategoryList = widget.datastore.categoryList;
-    AccountList = widget.datastore.accountList;
+    categoryList = widget.datastore.categoryList;
+    accountList = widget.datastore.accountList;
     resetAll();
     valueEditingController.addListener(() {
+      FocusManager.instance.primaryFocus?.unfocus();
       setState(() {});
     });
   }
@@ -47,17 +48,17 @@ class _SpendState extends State<SpendWidget> {
   showSnackBar(BuildContext context, String s) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(s),
-      duration: Duration(seconds: 3),
+      duration: const Duration(seconds: 2),
     ));
   }
 
   void resetAll() {
-    account = AccountList[0];
-    accountRec = AccountList[0];
-    if (AccountList.length > 1) {
-      accountRec = AccountList[1];
+    account = accountList[0];
+    accountRec = accountList[0];
+    if (accountList.length > 1) {
+      accountRec = accountList[1];
     }
-    tag = CategoryList[0];
+    tag = categoryList.firstWhere((element) => element.caption == "Other");
     valueEditingController.text = "";
     noteEditingController.text = "";
     itemType = ItemType.expense;
@@ -100,7 +101,7 @@ class _SpendState extends State<SpendWidget> {
                 borderRadius: BorderRadius.circular(10.0),
                 highlightColor: Colors.blue,
                 onTap: () {
-                  if (caption == "Transfer" && AccountList.length < 2) {
+                  if (caption == "Transfer" && accountList.length < 2) {
                     showSnackBar(context,
                         "You cannot Transfer with less than 2 accounts");
                   } else {
@@ -140,7 +141,7 @@ class _SpendState extends State<SpendWidget> {
       }
     }
 
-    if (itemType == ItemType.transfer) {
+    if (itemType == ItemType.transfer && account.id == accountRec.id) {
       showSnackBar(context, "Cannot Transfer to Same Account");
       return;
     }
@@ -154,6 +155,12 @@ class _SpendState extends State<SpendWidget> {
       entry.tagId = tag.id;
       entry.value = double.parse(valueEditingController.text);
 
+      if (itemType == ItemType.income) {
+        entry.excludeFromSpending = true;
+      } else {
+        entry.excludeFromIncome = true;
+      }
+
       if (itemType == ItemType.expense) {
         entry.value *= -1;
       }
@@ -166,8 +173,9 @@ class _SpendState extends State<SpendWidget> {
       entry.dateTime = date.millisecondsSinceEpoch;
       entry.accId = account.id; // sending account
       entry.recAccId = accountRec.id; // receive account
-      entry.excludeFromSum = true;
-      entry.tagId = CategoryList.firstWhere((e) => e.caption == "Transfer").id;
+      entry.excludeFromSpending = true;
+      entry.excludeFromIncome = true;
+      entry.tagId = categoryList.firstWhere((e) => e.caption == "Transfer").id;
       entry.value = double.parse(valueEditingController.text) * -1;
       widget.datastore.spendingBox.put(entry);
     }
@@ -185,7 +193,7 @@ class _SpendState extends State<SpendWidget> {
             resizeToAvoidBottomInset: false,
             backgroundColor: Colors.white,
             body: SingleChildScrollView(
-                child: Container(
+                child: SizedBox(
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height -
                         64, // 64 = bottomnavbar
@@ -244,6 +252,19 @@ class _SpendState extends State<SpendWidget> {
                             ],
                           ),
                         ),
+                        //************ Three Toggles ************//
+                        Container(
+                          margin: const EdgeInsets.fromLTRB(28, 0, 28, 5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              toggleButton("Income"),
+                              toggleButton("Transfer"),
+                              toggleButton("Expense"),
+                            ],
+                          ),
+                        ),
                         Row(
                           children: [
                             //************ ACCOUNT ************//
@@ -263,11 +284,12 @@ class _SpendState extends State<SpendWidget> {
                                     onTap: () async {
                                       String newAccount = await selectFromList(
                                           context,
-                                          AccountList.map((e) => e.caption)
+                                          accountList
+                                              .map((e) => e.caption)
                                               .toList());
                                       if (newAccount.isNotEmpty) {
                                         setState(() {
-                                          account = AccountList.firstWhere(
+                                          account = accountList.firstWhere(
                                               (element) =>
                                                   element.caption ==
                                                   newAccount);
@@ -285,7 +307,7 @@ class _SpendState extends State<SpendWidget> {
                                         const Spacer(),
                                         Text(
                                           account.caption,
-                                          style: TextStyle(fontSize: 16),
+                                          style: const TextStyle(fontSize: 16),
                                         ),
                                       ],
                                     ),
@@ -296,9 +318,9 @@ class _SpendState extends State<SpendWidget> {
                               child: Container(
                                   height: 40,
                                   margin:
-                                      const EdgeInsets.fromLTRB(5, 0, 30, 5),
+                                  const EdgeInsets.fromLTRB(5, 0, 30, 5),
                                   padding:
-                                      const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                                  const EdgeInsets.fromLTRB(15, 0, 15, 0),
                                   decoration: BoxDecoration(
                                     color: Colors.grey.shade200,
                                     borderRadius: const BorderRadius.all(
@@ -308,29 +330,31 @@ class _SpendState extends State<SpendWidget> {
                                     onTap: () async {
                                       if (itemType.string != "transfer") {
                                         String newAccount =
-                                            await selectFromList(
-                                                context,
-                                                CategoryList.map(
-                                                    (e) => e.caption).toList());
+                                        await selectFromList(
+                                            context,
+                                            categoryList
+                                                .map((e) => e.caption)
+                                                .toList());
                                         if (newAccount.isNotEmpty) {
                                           setState(() {
-                                            tag = CategoryList.firstWhere(
-                                                (element) =>
-                                                    element.caption ==
+                                            tag = categoryList.firstWhere(
+                                                    (element) =>
+                                                element.caption ==
                                                     newAccount);
                                           });
                                         }
                                       } else {
                                         String newAccount =
-                                            await selectFromList(
-                                                context,
-                                                AccountList.map(
-                                                    (e) => e.caption).toList());
+                                        await selectFromList(
+                                            context,
+                                            accountList
+                                                .map((e) => e.caption)
+                                                .toList());
                                         if (newAccount.isNotEmpty) {
                                           setState(() {
-                                            accountRec = AccountList.firstWhere(
-                                                (element) =>
-                                                    element.caption ==
+                                            accountRec = accountList.firstWhere(
+                                                    (element) =>
+                                                element.caption ==
                                                     newAccount);
                                           });
                                         }
@@ -349,7 +373,7 @@ class _SpendState extends State<SpendWidget> {
                                           itemType.string == "transfer"
                                               ? accountRec.caption
                                               : tag.caption,
-                                          style: TextStyle(fontSize: 16),
+                                          style: const TextStyle(fontSize: 16),
                                         ),
                                       ],
                                     ),
@@ -383,19 +407,6 @@ class _SpendState extends State<SpendWidget> {
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               )
-                            ],
-                          ),
-                        ),
-                        //************ Three Toggles ************//
-                        Container(
-                          margin: const EdgeInsets.fromLTRB(28, 0, 28, 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              toggleButton("Income"),
-                              toggleButton("Transfer"),
-                              toggleButton("Expense"),
                             ],
                           ),
                         ),

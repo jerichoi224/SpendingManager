@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spending_manager/util/dbTool.dart';
-import 'package:spending_manager/widgets/DashboardWidget.dart';
+import 'package:spending_manager/widgets/AnalyzeWidget.dart';
 import 'package:spending_manager/widgets/CalendarWidget.dart';
-import 'package:spending_manager/widgets/RoutineWidget.dart';
 import 'package:spending_manager/widgets/SettingsWidget.dart';
 import 'package:spending_manager/widgets/SpendWidget.dart';
 import 'package:carbon_icons/carbon_icons.dart';
@@ -14,7 +13,7 @@ class HomeWidget extends StatefulWidget {
   HomeWidget({Key? key, required this.parentCtx, required this.datastore});
 
   // current = 4 해야지, 언어 바꿀때, 선택이 설정으로 된다.
-  static int _currentIndex = 4;
+  static int _currentIndex = 3;
 
   static void changePage(BuildContext context, int ind) async {
     _HomeState? state = context.findAncestorStateOfType<_HomeState>();
@@ -42,8 +41,7 @@ class _HomeState extends State<HomeWidget> {
   List<Widget> _children() => [
         SpendWidget(datastore: widget.datastore),
         CalendarWidget(datastore: widget.datastore),
-        RoutineWidget(datastore: widget.datastore),
-        DashboardWidget(datastore: widget.datastore),
+        AnalyzeWidget(datastore: widget.datastore),
         SettingsWidget(datastore: widget.datastore),
       ];
 
@@ -98,9 +96,7 @@ class _HomeState extends State<HomeWidget> {
                       ),
                       label: "Analyze"),
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.calendar_today), label: "1"),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.settings), label: "1"),
+                      icon: Icon(CarbonIcons.settings, size: 32,), label: "1"),
                 ],
               ),
             )));

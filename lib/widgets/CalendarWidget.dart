@@ -18,12 +18,6 @@ class CalendarWidget extends StatefulWidget {
   State createState() => _CalendarState();
 }
 
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
-  }
-}
-
 class _CalendarState extends State<CalendarWidget> {
   Map<int, Color> itemTypeColor = {
     ItemType.income.intVal: Colors.blue,
@@ -55,17 +49,25 @@ class _CalendarState extends State<CalendarWidget> {
     return s;
   }
 
-  Widget moneyText(double amount, int itemType, bool excluded)
+  Widget moneyText(SpendingEntry item, bool receiveAcc)
   {
+    double amount = item.value;
+    if(receiveAcc) {
+      amount *= -1;
+    }
+
+    bool excluded = (amount < 0 && item.excludeFromSpending) || (amount > 0 && item.excludeFromIncome);
+
     String text = amount.toString();
     if(amount > 0) {
       text = "+$text";
     }
+
     return Text(text,
       style: GoogleFonts.lato(
           textStyle: TextStyle(
               fontSize: 16,
-              color: excluded ? Colors.black45 : itemTypeColor[itemType],
+              color: excluded ? Colors.black45 : itemTypeColor[item.itemType],
               fontWeight: FontWeight.w500
           )),
     );
@@ -150,7 +152,7 @@ class _CalendarState extends State<CalendarWidget> {
                           )),
                     ),
                     subtitle: Text(AccIdString[item.recAccId]!),
-                    trailing: moneyText(item.value * -1, item.itemType, item.excludeFromSum)
+                    trailing: moneyText(item, true)
                 )));
           }
           historyList.add(Container(
@@ -167,7 +169,7 @@ class _CalendarState extends State<CalendarWidget> {
                   )),
                 ),
                 subtitle: Text(AccIdString[item.accId]!),
-                trailing: moneyText(item.value, item.itemType, item.excludeFromSum)
+                trailing: moneyText(item, false)
               )));
         }
 
@@ -196,15 +198,11 @@ class _CalendarState extends State<CalendarWidget> {
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
           backgroundColor: Colors.white,
-            appBar: AppBar(
-                backgroundColor: Colors.white,
-                elevation: 0,
-                title: const Text(
-                  "Calendar Timeline",
-                  style: TextStyle(color: Colors.black87),
-                )),
             body: Column(
               children: [
+                SizedBox(
+                  height: MediaQuery.of(context).viewPadding.top,
+                ),
                 TableCalendar(
                   firstDay: DateTime.utc(2010, 10, 16),
                   lastDay: DateTime.utc(2030, 3, 14),
