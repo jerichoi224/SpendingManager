@@ -4,6 +4,7 @@ import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/widgets/AnalyzePages/SpendingByCategoryWidget.dart';
 import 'package:floating_bottom_navigation_bar/floating_bottom_navigation_bar.dart';
+import 'package:spending_manager/widgets/AnalyzePages/TargetSpendingWidget.dart';
 
 class AnalyzeWidget extends StatefulWidget {
   late Datastore datastore;
@@ -122,7 +123,7 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                             children: [
                               SpendingByCategoryWidget(
                                 key: UniqueKey(), datastore: widget.datastore, monthlyList: monthlyList),
-                              SpendingByCategoryWidget(
+                              TargetSpendingWidget(
                                   key: UniqueKey(), datastore: widget.datastore, monthlyList: monthlyList)
                             ],
                         ),
@@ -130,8 +131,9 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                     ],
                   ))),
           bottomNavigationBar: FloatingNavbar(
-            backgroundColor: Colors.blue.shade300,
-            selectedItemColor: Colors.black54,
+            backgroundColor: Colors.black12,
+            unselectedItemColor: Colors.black38,
+            selectedItemColor: Colors.black87,
             onTap: (int index) {
               setState(() {
                 _currentIndex = index;

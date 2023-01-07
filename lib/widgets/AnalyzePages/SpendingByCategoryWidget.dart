@@ -24,8 +24,6 @@ class SpendingByCategoryWidget extends StatefulWidget {
 
 class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
   Map<int, String> tagMap = {}; // tagid to string
-  DateFormat mapKey = DateFormat('yyyyMM');
-
   Map<int, double> spendingPerCategory = {}; // tagid to total spending
   double totalSpending = 0;
   int pieChartSelectIndex = -1;
@@ -83,12 +81,12 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
                     100).round()}%)",
                 style: GoogleFonts.lato(
                     textStyle: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w600))),
+                        fontSize: 16, fontWeight: FontWeight.w400))),
             Spacer(),
             Text((spendingPerCategory[i]! * -1).toString(),
                 style: GoogleFonts.lato(
                     textStyle: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w600)))
+                        fontSize: 16, fontWeight: FontWeight.w400)))
           ],
         ),
       ));
@@ -98,8 +96,7 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
 
   List<Color> generatePallete(int n) {
     List<Color> pallete = [];
-    Color color = Color(0xFF82C3EC); // yellow
-
+    Color color = Colors.blue.shade200;
     for (int i = 0; i < n; i++) {
       HslColor hslColor = HslColor.fromColor(color);
       pallete.add(hslColor.rotateHue((360 / n * i) % 360).toColor());
@@ -183,10 +180,6 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
                       ),
                       const Spacer(),
                       Container(
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                            color: Colors.grey.shade200,
-                          ),
                           margin: const EdgeInsets.fromLTRB(0, 0, 15, 0),
                           child: IconButton(
                               onPressed: () {
