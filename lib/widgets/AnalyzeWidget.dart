@@ -22,13 +22,6 @@ class _AnalyzeState extends State<AnalyzeWidget> {
 
   final pageController = PageController(initialPage: 0);
 
-  List<Widget> _children() => [
-        SpendingByCategoryWidget(
-            datastore: widget.datastore, monthlyList: monthlyList),
-        SpendingByCategoryWidget(
-            datastore: widget.datastore, monthlyList: monthlyList)
-      ];
-
   changePage(int index) {
     setState(() {
       _currentIndex = index;
@@ -38,9 +31,8 @@ class _AnalyzeState extends State<AnalyzeWidget> {
   @override
   void initState() {
     super.initState();
-    processNow();
     spendingList = widget.datastore.spendingList;
-    spendingList.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+    processNow();
   }
 
   void processNow() {
@@ -55,6 +47,7 @@ class _AnalyzeState extends State<AnalyzeWidget> {
             element.dateTime >= start.millisecondsSinceEpoch &&
             element.dateTime < end.millisecondsSinceEpoch)
         .toList();
+    print(monthlyList);
   }
 
   Widget monthSelector() {
@@ -106,6 +99,7 @@ class _AnalyzeState extends State<AnalyzeWidget> {
         child: Scaffold(
           backgroundColor: Colors.white,
           body: SingleChildScrollView(
+            physics: NeverScrollableScrollPhysics(),
               child: SizedBox(
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height -
@@ -125,12 +119,18 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                               changePage(index);
                             },
                             controller: pageController,
-                            children: _children()),
+                            children: [
+                              SpendingByCategoryWidget(
+                                key: UniqueKey(), datastore: widget.datastore, monthlyList: monthlyList),
+                              SpendingByCategoryWidget(
+                                  key: UniqueKey(), datastore: widget.datastore, monthlyList: monthlyList)
+                            ],
+                        ),
                       )
                     ],
                   ))),
           bottomNavigationBar: FloatingNavbar(
-            backgroundColor: Colors.blueAccent.shade400,
+            backgroundColor: Colors.blue.shade300,
             selectedItemColor: Colors.black54,
             onTap: (int index) {
               setState(() {
