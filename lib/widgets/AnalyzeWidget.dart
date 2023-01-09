@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/widgets/AnalyzePages/SpendingByCategoryWidget.dart';
-import 'package:floating_bottom_navigation_bar/floating_bottom_navigation_bar.dart';
+import 'package:spending_manager/widgets/AnalyzePages/SpendingByAccount.dart';
 import 'package:spending_manager/widgets/AnalyzePages/TargetSpendingWidget.dart';
+import 'package:floating_bottom_navigation_bar/floating_bottom_navigation_bar.dart';
 
 class AnalyzeWidget extends StatefulWidget {
   late Datastore datastore;
@@ -48,7 +49,6 @@ class _AnalyzeState extends State<AnalyzeWidget> {
             element.dateTime >= start.millisecondsSinceEpoch &&
             element.dateTime < end.millisecondsSinceEpoch)
         .toList();
-    print(monthlyList);
   }
 
   Widget monthSelector() {
@@ -99,9 +99,11 @@ class _AnalyzeState extends State<AnalyzeWidget> {
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
           backgroundColor: Colors.white,
-          body: SingleChildScrollView(
+          body:
+              /*SingleChildScrollView(
             physics: NeverScrollableScrollPhysics(),
-              child: SizedBox(
+              child:*/
+              SizedBox(
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height -
                       64, // 64 = bottomnavbar
@@ -114,41 +116,57 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                       monthSelector(),
                       Expanded(
                         child: PageView(
-                            physics: NeverScrollableScrollPhysics(),
-                            onPageChanged: (index) {
-                              FocusScope.of(context).unfocus();
-                              changePage(index);
-                            },
-                            controller: pageController,
-                            children: [
-                              SpendingByCategoryWidget(
-                                key: UniqueKey(), datastore: widget.datastore, monthlyList: monthlyList),
-                              TargetSpendingWidget(
-                                  key: UniqueKey(), datastore: widget.datastore, monthlyList: monthlyList)
-                            ],
+                          physics: NeverScrollableScrollPhysics(),
+                          onPageChanged: (index) {
+                            FocusScope.of(context).unfocus();
+                            changePage(index);
+                          },
+                          controller: pageController,
+                          children: [
+                            SpendingByCategoryWidget(
+                                key: UniqueKey(),
+                                datastore: widget.datastore,
+                                monthlyList: monthlyList),
+                            TargetSpendingWidget(
+                                key: UniqueKey(),
+                                datastore: widget.datastore,
+                                monthlyList: monthlyList),
+                            SpendingByAccountWidget(
+                                key: UniqueKey(),
+                                datastore: widget.datastore,
+                                monthlyList: monthlyList),
+                          ],
                         ),
                       )
                     ],
-                  ))),
-          bottomNavigationBar: FloatingNavbar(
-            backgroundColor: Colors.black12,
-            unselectedItemColor: Colors.black38,
-            selectedItemColor: Colors.black87,
-            onTap: (int index) {
-              setState(() {
-                _currentIndex = index;
-                pageController.animateToPage(_currentIndex,
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.ease);
-              });
-            },
-            currentIndex: _currentIndex,
-            items: [
-              FloatingNavbarItem(icon: CarbonIcons.tag, title: 'Category'),
-              FloatingNavbarItem(icon: CarbonIcons.chart_line, title: 'Target'),
+                  )
+                  //      )
+                  ),
+          bottomNavigationBar: monthlyList.isEmpty
+              ? null
+              : FloatingNavbar(
+                  backgroundColor: Colors.black12,
+                  unselectedItemColor: Colors.black38,
+                  selectedItemColor: Colors.black87,
+                  onTap: (int index) {
+                    setState(() {
+                      _currentIndex = index;
+                      pageController.animateToPage(_currentIndex,
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.ease);
+                    });
+                  },
+                  currentIndex: _currentIndex,
+                  items: [
+                    FloatingNavbarItem(
+                        icon: CarbonIcons.tag, title: 'Category'),
+                    FloatingNavbarItem(
+                        icon: CarbonIcons.chart_line, title: 'Target'),
+                    FloatingNavbarItem(
+                        icon: CarbonIcons.account, title: 'Account'),
 //              FloatingNavbarItem(icon: CarbonIcons.chart_combo, title: 'Average'),
-            ],
-          ),
+                  ],
+                ),
         ));
   }
 }

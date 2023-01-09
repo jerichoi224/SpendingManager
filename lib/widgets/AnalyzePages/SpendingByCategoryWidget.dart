@@ -77,8 +77,7 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-                "${tagMap[i]!} (${(spendingPerCategory[i]! / totalSpending *
-                    100).round()}%)",
+                "${tagMap[i]!} (${(spendingPerCategory[i]! / totalSpending * 100).round()}%)",
                 style: GoogleFonts.lato(
                     textStyle: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w400))),
@@ -117,7 +116,10 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
             xValueMapper: (_ChartData data, _) => data.xData,
             yValueMapper: (_ChartData data, _) => data.yData * -1,
             dataLabelMapper: (_ChartData data, _) => data.xData,
-            dataLabelSettings: DataLabelSettings(isVisible: true),
+            dataLabelSettings: DataLabelSettings(
+                isVisible: true,
+                textStyle: GoogleFonts.lato(
+                    textStyle: const TextStyle(fontWeight: FontWeight.w400))),
             onPointTap: (ChartPointDetails pointInteractionDetails) {
               print(pointInteractionDetails.pointIndex);
             },
@@ -131,25 +133,27 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
     }
 
     return SfCartesianChart(
-        primaryXAxis: CategoryAxis(),
+        primaryXAxis: CategoryAxis(
+            labelStyle: GoogleFonts.lato(
+                textStyle: const TextStyle(fontWeight: FontWeight.w700))),
         primaryYAxis: NumericAxis(
             minimum: 0,
             maximum: (chartData
-                .map((e) => e.yData / totalSpending * 10)
-                .toList()
-                .reduce(max) +
-                1)
-                .floor() *
+                            .map((e) => e.yData / totalSpending * 10)
+                            .toList()
+                            .reduce(max) +
+                        1)
+                    .floor() *
                 10,
             interval: 10),
-        tooltipBehavior: TooltipBehavior(enable: true),
+        tooltipBehavior: TooltipBehavior(enable: false),
         series: <ChartSeries<_ChartData, String>>[
           ColumnSeries<_ChartData, String>(
               borderRadius: BorderRadius.vertical(top: Radius.circular(7)),
               dataSource: chartData,
               xValueMapper: (_ChartData data, _) => data.xData,
               yValueMapper: (_ChartData data, _) =>
-              (data.yData) / totalSpending * 100,
+                  (data.yData) / totalSpending * 100,
               name: "Spending",
               color: Colors.blue.shade300)
         ]);
@@ -161,57 +165,60 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
             backgroundColor: Colors.white,
-            body:
-            chartData.isEmpty ? Container(child: Center(child: Text("No Data Found"))):
-            Column(
-              children: [
-                SizedBox(
-                  height: 50,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+            body: chartData.isEmpty
+                ? Container(child: Center(child: Text("No Data Found")))
+                : Column(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                        child: Text("Spending Per Category",
-                            style: GoogleFonts.lato(
-                                textStyle: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w600))),
-                      ),
-                      const Spacer(),
-                      Container(
-                          margin: const EdgeInsets.fromLTRB(0, 0, 15, 0),
-                          child: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  showPieChart = !showPieChart;
-                                });
-                              },
-                              icon: Icon(showPieChart
-                                  ? CarbonIcons.chart_bar
-                                  : CarbonIcons.chart_pie)))
-                    ],
-                  ),
-                ),
-                showPieChart ? pieChartCategory() : barChartCategory(),
-                const SizedBox(
-                  height: 5,
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: MediaQuery.removePadding(
-                        removeTop: true,
-                        context: context,
-                        child: ListView(
-                          primary: false,
-                          shrinkWrap: true,
-                          children: spendingHistory(),
+                      SizedBox(
+                        height: 50,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                              child: Text("Spending Per Category",
+                                  style: GoogleFonts.lato(
+                                      textStyle: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w600))),
+                            ),
+                            const Spacer(),
+                            Container(
+                                margin: const EdgeInsets.fromLTRB(0, 0, 15, 0),
+                                child: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        showPieChart = !showPieChart;
+                                      });
+                                    },
+                                    icon: Icon(showPieChart
+                                        ? CarbonIcons.chart_bar
+                                        : CarbonIcons.chart_pie)))
+                          ],
                         ),
-                      )),
-                ),
-              ],
-            )));
+                      ),
+                      showPieChart ? pieChartCategory() : barChartCategory(),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Expanded(
+                        child:Container(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            child: MediaQuery.removePadding(
+                              removeTop: true,
+                              context: context,
+                              child: ListView(
+                                primary: false,
+                                shrinkWrap: true,
+                                children: spendingHistory(),
+                              ),
+                            ),
+                          ),
+                        )
+                      )
+                    ],
+                  )));
   }
 }
 

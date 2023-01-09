@@ -46,12 +46,18 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
   }
 
   void processData() {
+    if (widget.monthlyList.isEmpty) {
+      return;
+    }
+
+    chartData.clear();
+    spendingPerDay.clear();
+
     widget.monthlyList.sort((a, b) => a.dateTime.compareTo(b.dateTime));
     DateTime date =
         DateTime.fromMillisecondsSinceEpoch(widget.monthlyList[0].dateTime);
     int keyDate =
         DateTime(date.year, date.month, 1, 0, 0, 0).millisecondsSinceEpoch;
-    chartData.clear();
     chartData.add(_TargetChartData(
         DateTime.fromMillisecondsSinceEpoch(keyDate), 0, 0, 0));
 
@@ -80,7 +86,7 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
 
   List<Widget> dailySpendingList() {
     if (chartData.isEmpty) {
-      return [Container()];
+      return [];
     }
 
     List<Widget> returnList = [];
@@ -97,16 +103,22 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
                   style: GoogleFonts.lato(
                       textStyle: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w400))),
-              Spacer(),
+              const Spacer(),
               Text(data.daily.toString(),
                   style: GoogleFonts.lato(
                       textStyle: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w400)))
+                          fontSize: 16, fontWeight: FontWeight.w400))),
+              const Spacer(),
+              Text(data.accum.toString(),
+                  style: GoogleFonts.lato(
+                      textStyle: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w400))),
             ],
           ),
         ));
       }
     }
+
     return returnList;
   }
 
@@ -119,12 +131,13 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
         primaryXAxis: DateTimeAxis(),
         legend: Legend(isVisible: true, position: LegendPosition.bottom),
         // Enable tooltip
-        tooltipBehavior: TooltipBehavior(enable: false),
+        tooltipBehavior: TooltipBehavior(enable: true),
         series: <LineSeries<_TargetChartData, DateTime>>[
           LineSeries<_TargetChartData, DateTime>(
               dataSource: chartData,
               xValueMapper: (_TargetChartData data, _) => data.date,
               yValueMapper: (_TargetChartData data, _) => data.accum,
+              markerSettings: MarkerSettings(isVisible: true),
               name: "Spending"),
           LineSeries<_TargetChartData, DateTime>(
               dataSource: chartData,
@@ -163,13 +176,40 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
                                     onPressed: () {
                                       setState(() {});
                                     },
-                                    icon: const Icon(CarbonIcons.settings)))
+                                    icon: const Icon(
+                                        CarbonIcons.settings_adjust)))
                           ],
                         ),
                       ),
                       lineChart(),
                       const SizedBox(
                         height: 5,
+                      ),
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
+                        height: 40,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text("Date",
+                                style: GoogleFonts.lato(
+                                    textStyle: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700))),
+                            const Spacer(),
+                            Text("Daily Spent",
+                                style: GoogleFonts.lato(
+                                    textStyle: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700))),
+                            const Spacer(),
+                            Text("Accumulative",
+                                style: GoogleFonts.lato(
+                                    textStyle: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700)))
+                          ],
+                        ),
                       ),
                       Expanded(
                         child: SingleChildScrollView(
@@ -182,7 +222,8 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
                                 shrinkWrap: true,
                                 children: dailySpendingList(),
                               ),
-                            )),
+                            )
+                        ),
                       ),
                     ],
                   )));
