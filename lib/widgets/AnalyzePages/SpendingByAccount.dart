@@ -82,10 +82,11 @@ class _SpendingByAccountState extends State<SpendingByAccountWidget> {
     }
 
     for (CategoryEntry c in widget.datastore.categoryList) {
-      if (true) {
-        //(categoryUsed[c.id] ?? false) {
+      if (true && (categoryUsed[c.id] ?? false)) {
+//        () {
         seriesData.add(StackedColumnSeries<_ChartData, String>(
             dataSource: chartData,
+            animationDuration: 650,
             name: c.caption,
             xValueMapper: (_ChartData data, _) => data.xData,
             yValueMapper: (_ChartData data, _) => data.yData[c.id]));

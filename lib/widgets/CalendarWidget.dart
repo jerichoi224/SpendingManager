@@ -5,8 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/dbTool.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:spending_manager/util/enum.dart';
+import 'package:spending_manager/widgets/components/viewEditSpendingPopup.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarWidget extends StatefulWidget {
@@ -33,10 +33,9 @@ class _CalendarState extends State<CalendarWidget> {
   @override
   void initState() {
     entryList = widget.datastore.spendingList;
-    for(AccountEntry entry in widget.datastore.accountList)
-      {
-        AccIdString[entry.id] = entry.caption;
-      }
+    for (AccountEntry entry in widget.datastore.accountList) {
+      AccIdString[entry.id] = entry.caption;
+    }
 
     super.initState();
   }
@@ -49,28 +48,34 @@ class _CalendarState extends State<CalendarWidget> {
     return s;
   }
 
-  Widget moneyText(SpendingEntry item, bool receiveAcc)
-  {
+  Widget moneyText(SpendingEntry item, bool receiveAcc) {
     double amount = item.value;
-    if(receiveAcc) {
+    if (receiveAcc) {
       amount *= -1;
     }
 
-    bool excluded = (amount < 0 && item.excludeFromSpending) || (amount > 0 && item.excludeFromIncome);
+    bool excluded = (amount < 0 && item.excludeFromSpending) ||
+        (amount > 0 && item.excludeFromIncome);
 
     String text = amount.toString();
-    if(amount > 0) {
+    if (amount > 0) {
       text = "+$text";
     }
 
-    return Text(text,
+    return Text(
+      text,
       style: GoogleFonts.lato(
           textStyle: TextStyle(
               fontSize: 16,
               color: excluded ? Colors.black45 : itemTypeColor[item.itemType],
-              fontWeight: FontWeight.w500
-          )),
+              fontWeight: FontWeight.w500)),
     );
+  }
+
+  void openSpendingItem(BuildContext context, int entryId) async {
+    final result =
+        await viewEditSpendingPopup(context, widget.datastore, entryId);
+    if (result.runtimeType == int) {}
   }
 
   List<Widget> spendingHistory() {
@@ -83,7 +88,7 @@ class _CalendarState extends State<CalendarWidget> {
     }
 
     List<Widget> historyList = [
-      SizedBox(
+      const SizedBox(
         height: 20,
       )
     ];
@@ -136,40 +141,53 @@ class _CalendarState extends State<CalendarWidget> {
         ));
 
         for (SpendingEntry item in tmpList) {
-          if(item.itemType == ItemType.transfer.intVal) // Receive Entry
+          if (item.itemType == ItemType.transfer.intVal) // Receive Entry
           {
             historyList.add(Container(
                 margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                child: InkWell(
+                    customBorder: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    onTap: () {
+                      openSpendingItem(context, item.id);
+                    },
+                    child: ListTile(
+                        visualDensity: const VisualDensity(vertical: -2),
+                        dense: false,
+                        leading: const Icon(CarbonIcons.arrows_horizontal),
+                        title: Text(
+                          item.caption,
+                          style: GoogleFonts.lato(
+                              textStyle: const TextStyle(
+                            fontSize: 16,
+                          )),
+                        ),
+                        subtitle: Text(AccIdString[item.recAccId]!),
+                        trailing: moneyText(item, true)))));
+          }
+          historyList.add(Container(
+              margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+              child: InkWell(
+                customBorder: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                onTap: () {
+                  openSpendingItem(context, item.id);
+                },
                 child: ListTile(
-                    visualDensity: const VisualDensity(vertical: -2),
+                    visualDensity: VisualDensity(vertical: -2),
                     dense: false,
-                    leading: const Icon(CarbonIcons.arrows_horizontal),
+                    leading: Icon(CarbonIcons.noodle_bowl),
                     title: Text(
                       item.caption,
                       style: GoogleFonts.lato(
                           textStyle: const TextStyle(
-                            fontSize: 16,
-                          )),
+                        fontSize: 16,
+                      )),
                     ),
-                    subtitle: Text(AccIdString[item.recAccId]!),
-                    trailing: moneyText(item, true)
-                )));
-          }
-          historyList.add(Container(
-              margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
-              child: ListTile(
-                visualDensity: VisualDensity(vertical: -2),
-                dense: false,
-                leading: Icon(CarbonIcons.arrows_horizontal),
-                title: Text(
-                  item.caption,
-                  style: GoogleFonts.lato(
-                      textStyle: const TextStyle(
-                    fontSize: 16,
-                  )),
-                ),
-                subtitle: Text(AccIdString[item.accId]!),
-                trailing: moneyText(item, false)
+                    subtitle: Text(AccIdString[item.accId]!),
+                    trailing: moneyText(item, false)),
               )));
         }
 
@@ -180,10 +198,10 @@ class _CalendarState extends State<CalendarWidget> {
         dayIncome = 0;
       }
 
-      if(entry.itemType == ItemType.expense.intVal) {
+      if (entry.itemType == ItemType.expense.intVal) {
         dayExpense += entry.value;
       }
-      if(entry.itemType == ItemType.income.intVal) {
+      if (entry.itemType == ItemType.income.intVal) {
         dayIncome += entry.value;
       }
       tmpList.add(entry);
@@ -197,7 +215,7 @@ class _CalendarState extends State<CalendarWidget> {
     return GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-          backgroundColor: Colors.white,
+            backgroundColor: Colors.white,
             body: Column(
               children: [
                 SizedBox(
@@ -232,13 +250,16 @@ class _CalendarState extends State<CalendarWidget> {
                 ),
                 Expanded(
                   child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: ListView(
-                      primary: false,
-                      shrinkWrap: true,
-                      children: spendingHistory(),
-                    ),
-                  ),
+                      scrollDirection: Axis.vertical,
+                      child: MediaQuery.removePadding(
+                        removeTop: true,
+                        context: context,
+                        child: ListView(
+                          primary: false,
+                          shrinkWrap: true,
+                          children: spendingHistory(),
+                        ),
+                      )),
                 )
               ],
             )));

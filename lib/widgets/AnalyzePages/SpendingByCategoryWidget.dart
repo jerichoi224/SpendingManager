@@ -110,6 +110,7 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
         series: <DoughnutSeries<_ChartData, String>>[
           DoughnutSeries<_ChartData, String>(
             explode: true,
+            animationDuration: 650,
             radius: "100",
             innerRadius: "45",
             dataSource: chartData,
@@ -149,6 +150,7 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
         tooltipBehavior: TooltipBehavior(enable: false),
         series: <ChartSeries<_ChartData, String>>[
           ColumnSeries<_ChartData, String>(
+              animationDuration: 650,
               borderRadius: BorderRadius.vertical(top: Radius.circular(7)),
               dataSource: chartData,
               xValueMapper: (_ChartData data, _) => data.xData,
@@ -202,7 +204,6 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
                         height: 5,
                       ),
                       Expanded(
-                        child:Container(
                           child: SingleChildScrollView(
                             scrollDirection: Axis.vertical,
                             child: MediaQuery.removePadding(
@@ -214,9 +215,7 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
                                 children: spendingHistory(),
                               ),
                             ),
-                          ),
-                        )
-                      )
+                          ))
                     ],
                   )));
   }
