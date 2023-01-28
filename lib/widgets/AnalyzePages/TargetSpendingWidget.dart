@@ -1,13 +1,11 @@
 import 'package:carbon_icons/carbon_icons.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'dart:math';
-import 'package:spending_manager/dbModels/categoryEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
+import 'package:spending_manager/main.dart';
 import 'package:spending_manager/util/dbTool.dart';
-import 'package:flutter_color_models/flutter_color_models.dart';
+import 'package:spending_manager/widgets/components/spendingTargetDialog.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class TargetSpendingWidget extends StatefulWidget {
@@ -23,26 +21,18 @@ class TargetSpendingWidget extends StatefulWidget {
 }
 
 class _TargetSpendingState extends State<TargetSpendingWidget> {
-  Map<int, String> tagMap = {}; // tagid to string
   DateFormat mapKey = DateFormat('MM-dd');
 
   Map<int, dynamic> spendingPerDay = {}; // date -> [dailytotal, acctotal, day]
   double totalSpending = 0;
   int pieChartSelectIndex = -1;
   List<_TargetChartData> chartData = [];
-  double dailyTarget = 20000;
-
+  double dailyTarget = 0;
   @override
   void initState() {
     super.initState();
-    createTagList();
+    dailyTarget = datastore.getPref("daily_target") ?? 0;
     processData();
-  }
-
-  void createTagList() {
-    for (CategoryEntry entry in widget.datastore.categoryList) {
-      tagMap[entry.id] = entry.caption;
-    }
   }
 
   void processData() {
@@ -55,7 +45,7 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
 
     widget.monthlyList.sort((a, b) => a.dateTime.compareTo(b.dateTime));
     DateTime date =
-        DateTime.fromMillisecondsSinceEpoch(widget.monthlyList[0].dateTime);
+    DateTime.fromMillisecondsSinceEpoch(widget.monthlyList[0].dateTime);
     int keyDate =
         DateTime(date.year, date.month, 1, 0, 0, 0).millisecondsSinceEpoch;
     chartData.add(_TargetChartData(
@@ -147,6 +137,14 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
         ]);
   }
 
+  void openSetTarget(BuildContext context) async {
+    final result = await spendingTargetDialog(context, datastore);
+    if (result.runtimeType == bool && result) {
+      dailyTarget = datastore.getPref("daily_target") ?? 0;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -155,78 +153,79 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
             body: chartData.isEmpty
                 ? Container(child: Center(child: Text("No Data Found")))
                 : Column(
+              children: [
+                SizedBox(
+                  height: 50,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      SizedBox(
-                        height: 50,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                              child: Text("Spending & Target",
-                                  style: GoogleFonts.lato(
-                                      textStyle: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600))),
-                            ),
-                            const Spacer(),
-                            Container(
-                                margin: const EdgeInsets.fromLTRB(0, 0, 15, 0),
-                                child: IconButton(
-                                    onPressed: () {
-                                      setState(() {});
-                                    },
-                                    icon: const Icon(
-                                        CarbonIcons.settings_adjust)))
-                          ],
-                        ),
-                      ),
-                      lineChart(),
-                      const SizedBox(
-                        height: 5,
-                      ),
                       Container(
-                        margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
-                        height: 40,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text("Date",
-                                style: GoogleFonts.lato(
-                                    textStyle: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700))),
-                            const Spacer(),
-                            Text("Daily Spent",
-                                style: GoogleFonts.lato(
-                                    textStyle: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700))),
-                            const Spacer(),
-                            Text("Accumulative",
-                                style: GoogleFonts.lato(
-                                    textStyle: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700)))
-                          ],
-                        ),
+                        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                        child: Text("Spending & Target",
+                            style: GoogleFonts.lato(
+                                textStyle: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w600))),
                       ),
-                      Expanded(
-                        child: SingleChildScrollView(
-                            scrollDirection: Axis.vertical,
-                            child: MediaQuery.removePadding(
-                              removeTop: true,
-                              context: context,
-                              child: ListView(
-                                primary: false,
-                                shrinkWrap: true,
-                                children: dailySpendingList(),
-                              ),
-                            )
-                        ),
-                      ),
+                      const Spacer(),
+                      Container(
+                          margin: const EdgeInsets.fromLTRB(0, 0, 15, 0),
+                          child: IconButton(
+                              onPressed: () {
+                                openSetTarget(context);
+                                setState(() {});
+                              },
+                              icon: const Icon(
+                                  CarbonIcons.settings_adjust)))
                     ],
-                  )));
+                  ),
+                ),
+                lineChart(),
+                const SizedBox(
+                  height: 5,
+                ),
+                Container(
+                  margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
+                  height: 40,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text("Date",
+                          style: GoogleFonts.lato(
+                              textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700))),
+                      const Spacer(),
+                      Text("Daily Spent",
+                          style: GoogleFonts.lato(
+                              textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700))),
+                      const Spacer(),
+                      Text("Accumulative",
+                          style: GoogleFonts.lato(
+                              textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700)))
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: MediaQuery.removePadding(
+                        removeTop: true,
+                        context: context,
+                        child: ListView(
+                          primary: false,
+                          shrinkWrap: true,
+                          children: dailySpendingList(),
+                        ),
+                      )
+                  ),
+                ),
+              ],
+            )));
   }
 }
 

@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:spending_manager/dbModels/accountEntry.dart';
+import 'package:spending_manager/dbModels/categoryEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/enum.dart';
 import 'package:spending_manager/widgets/components/viewEditSpendingPopup.dart';
+import 'package:spending_manager/widgets/components/viewEditTransferPopup.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarWidget extends StatefulWidget {
@@ -32,12 +34,16 @@ class _CalendarState extends State<CalendarWidget> {
 
   @override
   void initState() {
-    entryList = widget.datastore.spendingList;
+    updateState();
     for (AccountEntry entry in widget.datastore.accountList) {
       AccIdString[entry.id] = entry.caption;
     }
 
     super.initState();
+  }
+
+  updateState() {
+    entryList = widget.datastore.spendingList;
   }
 
   List<SpendingEntry> _getSpendingCount(DateTime day) {
@@ -73,9 +79,21 @@ class _CalendarState extends State<CalendarWidget> {
   }
 
   void openSpendingItem(BuildContext context, int entryId) async {
-    final result =
-        await viewEditSpendingPopup(context, widget.datastore, entryId);
-    if (result.runtimeType == int) {}
+    SpendingEntry item = widget.datastore.spendingList
+        .firstWhere((element) => element.id == entryId);
+    CategoryEntry tag = widget.datastore.categoryList
+        .firstWhere((element) => element.id == item.tagId);
+    var result = false;
+    if (tag.caption == "Transfer") {
+      result = await viewEditTransferPopup(context, widget.datastore, entryId);
+    } else {
+      result = await viewEditSpendingPopup(context, widget.datastore, entryId);
+    }
+    if (result.runtimeType == bool && result) {
+      setState(() {
+        updateState();
+      });
+    }
   }
 
   List<Widget> spendingHistory() {

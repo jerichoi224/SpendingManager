@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/StringUtil.dart';
 import 'package:spending_manager/util/dbTool.dart';
-import 'package:spending_manager/util/enum.dart';
 import 'package:spending_manager/widgets/components/datePicker.dart';
 import 'package:spending_manager/widgets/components/dropdownComponent.dart';
 
@@ -32,14 +31,17 @@ TextStyle latoFont(double size) {
   return GoogleFonts.lato(textStyle: TextStyle(fontSize: size));
 }
 
-Future<dynamic> viewEditSpendingPopup(
+Future<dynamic> viewEditTransferPopup(
     BuildContext context, Datastore datastore, int spendingId) async {
   TextEditingController noteController = TextEditingController();
   TextEditingController amountController = TextEditingController();
   SpendingEntry item =
       datastore.spendingList.firstWhere((element) => element.id == spendingId);
-  String selectedAccount = datastore.accountList
+  String fromAccount = datastore.accountList
       .firstWhere((element) => element.id == item.accId)
+      .caption;
+  String toAccount = datastore.accountList
+      .firstWhere((element) => element.id == item.recAccId)
       .caption;
 
   String selectedTag = datastore.categoryList
@@ -69,15 +71,11 @@ Future<dynamic> viewEditSpendingPopup(
                             padding: const EdgeInsets.fromLTRB(0, 0, 0, 15),
                             child: Row(children: [
                               Text(
-                                ItemType.values
-                                    .firstWhere((element) =>
-                                        element.intVal == item.itemType)
-                                    .name
-                                    .capitalize(),
+                                "Transfer",
                                 style: latoFont(24),
                               ),
                               const Spacer(),
-                              datePicker(context, date, (DateTime newVal) {
+                              datePicker(context, date, (DateTime newVal){
                                 setState(() {
                                   date = newVal;
                                 });
@@ -88,7 +86,7 @@ Future<dynamic> viewEditSpendingPopup(
                           child: Row(
                             children: [
                               Text(
-                                "Account",
+                                "From",
                                 style: latoFont(16),
                               ),
                               const Spacer(),
@@ -103,9 +101,9 @@ Future<dynamic> viewEditSpendingPopup(
                                                 style: latoFont(14)),
                                           ))
                                       .toList(),
-                                  selectedAccount, (value) {
+                                  fromAccount, (value) {
                                 setState(() {
-                                  selectedAccount = value;
+                                  fromAccount = value;
                                 });
                               }),
                             ],
@@ -116,26 +114,24 @@ Future<dynamic> viewEditSpendingPopup(
                           child: Row(
                             children: [
                               Text(
-                                "Tag",
+                                "To",
                                 style: latoFont(16),
                               ),
                               const Spacer(),
                               dropdownMenu(
                                   context,
-                                  datastore.categoryList
-                                      .where((item) {
-                                        return item.caption != "Transfer";
-                                      })
-                                      .map((tag) => DropdownMenuItem<String>(
-                                            value: tag.caption,
-                                            child: Text(tag.caption,
+                                  datastore.accountList
+                                      .map((account) =>
+                                          DropdownMenuItem<String>(
+                                            value: account.caption,
+                                            child: Text(account.caption,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: latoFont(14)),
                                           ))
                                       .toList(),
-                                  selectedTag, (value) {
+                                  toAccount, (value) {
                                 setState(() {
-                                  selectedTag = value;
+                                  toAccount = value;
                                 });
                               }),
                             ],
@@ -210,23 +206,25 @@ Future<dynamic> viewEditSpendingPopup(
                               Navigator.pop(context, true);
                             }),
                             actionButton("Save", () {
+                              if (toAccount == fromAccount) return;
                               item.caption = noteController.text;
                               if (!amountController.text.isNumeric()) return;
-                              item.value = double.parse(amountController.text);
-                              if (item.itemType == ItemType.expense.intVal) {
-                                item.value *= -1;
-                              }
-
+                              item.value =
+                                  double.parse(amountController.text) * -1;
                               item.accId = datastore.accountList
                                   .firstWhere((element) =>
-                                      element.caption == selectedAccount)
+                                      element.caption == fromAccount)
+                                  .id;
+                              item.recAccId = datastore.accountList
+                                  .firstWhere(
+                                      (element) => element.caption == toAccount)
                                   .id;
                               item.tagId = datastore.categoryList
                                   .firstWhere((element) =>
                                       element.caption == selectedTag)
                                   .id;
-                              item.dateTime = date.millisecondsSinceEpoch;
 
+                              item.dateTime = date.millisecondsSinceEpoch;
 
                               datastore.spendingBox.put(item);
                               datastore.spendingList =

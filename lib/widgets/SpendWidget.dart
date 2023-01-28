@@ -6,6 +6,7 @@ import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/enum.dart';
+import 'package:spending_manager/widgets/components/datePicker.dart';
 import 'package:spending_manager/widgets/components/keyboardWidget.dart';
 import 'package:spending_manager/widgets/components/selectFromListPopup.dart';
 
@@ -62,26 +63,6 @@ class _SpendState extends State<SpendWidget> {
     valueEditingController.text = "";
     noteEditingController.text = "";
     itemType = ItemType.expense;
-  }
-
-  Future<int> _selectDate(BuildContext context, DateTime dateTime) async {
-    DateTime? pickedDate = await showDatePicker(
-        context: context,
-        initialDate: dateTime,
-        firstDate: DateTime(2000, 1),
-        lastDate: DateTime(2101));
-    if (pickedDate == null) return 0;
-
-    TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(dateTime),
-    );
-    if (pickedTime == null) return 0;
-
-    DateTime picked = DateTime(pickedDate.year, pickedDate.month,
-        pickedDate.day, pickedTime.hour, pickedTime.minute);
-
-    return picked.millisecondsSinceEpoch;
   }
 
   Widget toggleButton(String caption) {
@@ -203,37 +184,11 @@ class _SpendState extends State<SpendWidget> {
                       children: [
                         const Spacer(),
                         //************ DATE ************//
-                        Container(
-                            height: 30,
-                            width: 120,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(5)),
-                            ),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(5.0),
-                              highlightColor: Colors.blue,
-                              onTap: () async {
-                                int newTime = await _selectDate(context, date);
-                                if (newTime != 0) {
-                                  setState(() {
-                                    date = DateTime.fromMillisecondsSinceEpoch(
-                                        newTime);
-                                  });
-                                }
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    DateFormat('yyyy-MM-dd').format(date),
-                                    style: const TextStyle(
-                                        fontSize: 16, color: Colors.black54),
-                                  ),
-                                ],
-                              ),
-                            )),
+                        datePicker(context, date, (DateTime newVal){
+                          setState(() {
+                            date = newVal;
+                          });
+                        }, false),
                         //************ MONEY AMOUNT ************//
                         Container(
                           height: 80,
@@ -318,9 +273,9 @@ class _SpendState extends State<SpendWidget> {
                               child: Container(
                                   height: 40,
                                   margin:
-                                  const EdgeInsets.fromLTRB(5, 0, 30, 5),
+                                      const EdgeInsets.fromLTRB(5, 0, 30, 5),
                                   padding:
-                                  const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                                      const EdgeInsets.fromLTRB(15, 0, 15, 0),
                                   decoration: BoxDecoration(
                                     color: Colors.grey.shade200,
                                     borderRadius: const BorderRadius.all(
@@ -330,31 +285,31 @@ class _SpendState extends State<SpendWidget> {
                                     onTap: () async {
                                       if (itemType.string != "transfer") {
                                         String newAccount =
-                                        await selectFromList(
-                                            context,
-                                            categoryList
-                                                .map((e) => e.caption)
-                                                .toList());
+                                            await selectFromList(
+                                                context,
+                                                categoryList
+                                                    .map((e) => e.caption)
+                                                    .toList());
                                         if (newAccount.isNotEmpty) {
                                           setState(() {
                                             tag = categoryList.firstWhere(
-                                                    (element) =>
-                                                element.caption ==
+                                                (element) =>
+                                                    element.caption ==
                                                     newAccount);
                                           });
                                         }
                                       } else {
                                         String newAccount =
-                                        await selectFromList(
-                                            context,
-                                            accountList
-                                                .map((e) => e.caption)
-                                                .toList());
+                                            await selectFromList(
+                                                context,
+                                                accountList
+                                                    .map((e) => e.caption)
+                                                    .toList());
                                         if (newAccount.isNotEmpty) {
                                           setState(() {
                                             accountRec = accountList.firstWhere(
-                                                    (element) =>
-                                                element.caption ==
+                                                (element) =>
+                                                    element.caption ==
                                                     newAccount);
                                           });
                                         }

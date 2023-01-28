@@ -27,8 +27,7 @@ class Datastore {
     initObjectBox();
   }
 
-  void initObjectBox()
-  {
+  void initObjectBox() {
     spendingBox = Box<SpendingEntry>(store);
     spendingList = spendingBox.getAll();
     categoryBox = Box<CategoryEntry>(store);
@@ -36,33 +35,27 @@ class Datastore {
     accountBox = Box<AccountEntry>(store);
     accountList = accountBox.getAll();
 
-    for(String key in prefs.getKeys()) {
+    for (String key in prefs.getKeys()) {
       prefMap[key] = prefs.get(key);
     }
   }
 
-  void setPref(String key, dynamic value)
-  {
-    if(value.runtimeType == String) {
+  void setPref(String key, dynamic value) {
+    if (value.runtimeType == String) {
       prefs.setString(key, value);
-    }
-    else if(value.runtimeType == double) {
+    } else if (value.runtimeType == double) {
       prefs.setDouble(key, value);
-    }
-    else if(value.runtimeType == bool) {
+    } else if (value.runtimeType == bool) {
       prefs.setBool(key, value);
-    }
-    else if(value.runtimeType == int) {
+    } else if (value.runtimeType == int) {
       prefs.setInt(key, value);
-    }
-    else if(value.runtimeType == List<String>){
+    } else if (value.runtimeType == List<String>) {
       prefs.setStringList(key, value);
     }
     prefMap[key] = value;
   }
 
-  dynamic getPref(String key)
-  {
+  dynamic getPref(String key) {
     return prefMap[key];
   }
 
@@ -74,19 +67,18 @@ class Datastore {
     return Datastore._create(store, prefs);
   }
 
-  static Future<String> objectBoxDataFilePath() async{
+  static Future<String> objectBoxDataFilePath() async {
     final directory = (await getApplicationDocumentsDirectory()).path;
     return "$directory/objectbox/data.mdb";
   }
 
-  bool closeStore(){
+  bool closeStore() {
     store.close();
     return true;
   }
 
-  restartDB() async{
+  restartDB() async {
     store = await openStore();
     initObjectBox();
   }
-
 }

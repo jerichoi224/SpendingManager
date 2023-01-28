@@ -95,53 +95,48 @@ class _AnalyzeState extends State<AnalyzeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQueryData = MediaQuery.of(context);
     return GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
+          resizeToAvoidBottomInset:false,
           backgroundColor: Colors.white,
-          body:
-              /*SingleChildScrollView(
-            physics: NeverScrollableScrollPhysics(),
-              child:*/
-              SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height -
-                      64, // 64 = bottomnavbar
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: MediaQuery.of(context).viewPadding.top + 20,
-                      ),
-                      monthSelector(),
-                      Expanded(
-                        child: PageView(
-                          physics: NeverScrollableScrollPhysics(),
-                          onPageChanged: (index) {
-                            FocusScope.of(context).unfocus();
-                            changePage(index);
-                          },
-                          controller: pageController,
-                          children: [
-                            SpendingByCategoryWidget(
-                                key: UniqueKey(),
-                                datastore: widget.datastore,
-                                monthlyList: monthlyList),
-                            TargetSpendingWidget(
-                                key: UniqueKey(),
-                                datastore: widget.datastore,
-                                monthlyList: monthlyList),
-                            SpendingByAccountWidget(
-                                key: UniqueKey(),
-                                datastore: widget.datastore,
-                                monthlyList: monthlyList),
-                          ],
-                        ),
-                      )
-                    ],
-                  )
-                  //      )
+          body: SizedBox(
+              width: mediaQueryData.size.width,
+              height: mediaQueryData.size.height - 64, // 64 = bottomnavbar
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: mediaQueryData.viewPadding.top + 20,
                   ),
+                  monthSelector(),
+                  Expanded(
+                    child: PageView(
+                      physics: NeverScrollableScrollPhysics(),
+                      onPageChanged: (index) {
+                        FocusScope.of(context).unfocus();
+                        changePage(index);
+                      },
+                      controller: pageController,
+                      children: [
+                        SpendingByCategoryWidget(
+                            key: UniqueKey(),
+                            datastore: widget.datastore,
+                            monthlyList: monthlyList),
+                        TargetSpendingWidget(
+                            key: UniqueKey(),
+                            datastore: widget.datastore,
+                            monthlyList: monthlyList),
+                        SpendingByAccountWidget(
+                            key: UniqueKey(),
+                            datastore: widget.datastore,
+                            monthlyList: monthlyList),
+                      ],
+                    ),
+                  )
+                ],
+              )),
           bottomNavigationBar: monthlyList.isEmpty
               ? null
               : FloatingNavbar(
