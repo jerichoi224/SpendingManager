@@ -34,6 +34,7 @@ class _AnalyzeState extends State<AnalyzeWidget> {
   void initState() {
     super.initState();
     spendingList = widget.datastore.spendingList;
+
     processNow();
   }
 
@@ -128,10 +129,10 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                             key: UniqueKey(),
                             datastore: widget.datastore,
                             monthlyList: monthlyList),
-                        SpendingByAccountWidget(
+                        /*SpendingByAccountWidget(
                             key: UniqueKey(),
                             datastore: widget.datastore,
-                            monthlyList: monthlyList),
+                            monthlyList: monthlyList),*/
                       ],
                     ),
                   )
@@ -157,8 +158,8 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                         icon: CarbonIcons.tag, title: 'Category'),
                     FloatingNavbarItem(
                         icon: CarbonIcons.chart_line, title: 'Target'),
-                    FloatingNavbarItem(
-                        icon: CarbonIcons.account, title: 'Account'),
+                  //  FloatingNavbarItem(
+                    //    icon: CarbonIcons.account, title: 'Account'),
 //              FloatingNavbarItem(icon: CarbonIcons.chart_combo, title: 'Average'),
                   ],
                 ),

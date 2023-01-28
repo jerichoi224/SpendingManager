@@ -1,9 +1,7 @@
 import 'package:carbon_icons/carbon_icons.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'dart:math';
+import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/dbModels/categoryEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/dbTool.dart';
@@ -24,16 +22,27 @@ class SpendingByCategoryWidget extends StatefulWidget {
 
 class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
   Map<int, String> tagMap = {}; // tagid to string
-  Map<int, double> spendingPerCategory = {}; // tagid to total spending
+  Map<int, double> spendingPerCategory = {}; // tag -> amount
+  Map<int, double> spendingPerAccount = {}; // account -> amount
+  Map<int, Map<int, double>> spendingByTagAccount =
+      {}; // tag -> account -> spending
+  Map<int, bool> accountUsed = {};
+  Map<int, bool> categoryUsed = {};
+  List<_ColumnChartData> columnChartData = [];
+  List<ChartSeries> seriesData = [];
+
   double totalSpending = 0;
   int pieChartSelectIndex = -1;
-  List<_ChartData> chartData = [];
+  List<_PieChartData> pieChartData = [];
   late List<int> sortedKeys;
   bool showPieChart = true;
 
   @override
   void initState() {
     super.initState();
+    if (widget.datastore.prefMap.keys.contains("show_pieChart")) {
+      showPieChart = widget.datastore.getPref("show_pieChart");
+    }
     createTagList();
     processData();
   }
@@ -45,11 +54,32 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
   }
 
   void processData() {
+    if (widget.monthlyList.isEmpty) {
+      return;
+    }
+
+    for (CategoryEntry c in widget.datastore.categoryList) {
+      Map<int, double> accForCategory = {};
+      for (AccountEntry acc in widget.datastore.accountList) {
+        accForCategory[acc.id] = 0;
+      }
+      spendingByTagAccount[c.id] = accForCategory;
+    }
+
     for (SpendingEntry entry in widget.monthlyList) {
       if (!entry.excludeFromSpending) {
         totalSpending += entry.value;
-        double val = spendingPerCategory[entry.tagId] ?? 0;
-        spendingPerCategory[entry.tagId] = val += entry.value;
+        double pVal = spendingPerCategory[entry.tagId] ?? 0;
+        spendingPerCategory[entry.tagId] = pVal += entry.value;
+
+        double accVal = spendingPerAccount[entry.accId] ?? 0;
+        spendingPerAccount[entry.accId] = accVal += entry.value * -1;
+
+        double cVal = spendingByTagAccount[entry.tagId]![entry.accId] ?? 0;
+        spendingByTagAccount[entry.tagId]![entry.accId] =
+            cVal + entry.value * -1;
+        categoryUsed[entry.tagId] = true;
+        accountUsed[entry.accId] = true;
       }
     }
 
@@ -58,11 +88,75 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
           spendingPerCategory[k1]!.compareTo(spendingPerCategory[k2]!));
 
     for (int i in sortedKeys) {
-      chartData.add(_ChartData(tagMap[i]!, spendingPerCategory[i]!, ""));
+      pieChartData.add(_PieChartData(tagMap[i]!, spendingPerCategory[i]!, ""));
+    }
+
+    for (int tag in spendingByTagAccount.keys) {
+      if (categoryUsed[tag] ?? false) {
+        Map<int, double> spentByCat = {};
+        for (AccountEntry acc in widget.datastore.accountList) {
+          spentByCat[acc.id] = spendingByTagAccount[tag]![acc.id] ?? 0;
+        }
+        columnChartData.add(_ColumnChartData(
+            widget.datastore.categoryList
+                .firstWhere((element) => element.id == tag)
+                .caption,
+            spentByCat));
+      }
+    }
+
+    for (AccountEntry acc in widget.datastore.accountList) {
+      if (true && (accountUsed[acc.id] ?? false)) {
+        seriesData.add(ColumnSeries<_ColumnChartData, String>(
+            animationDuration: 650,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
+            dataSource: columnChartData,
+            name: acc.caption,
+            xValueMapper: (_ColumnChartData data, _) => data.xData,
+            dataLabelMapper: (_ColumnChartData data, _) =>
+                data.yData[acc.id].toString(),
+            yValueMapper: (_ColumnChartData data, _) => data.yData[acc.id]));
+      }
     }
   }
 
-  List<Widget> spendingHistory() {
+  List<Widget> spendingByAccountList() {
+    if (spendingPerAccount.isEmpty) {
+      print("empty");
+      return [Container()];
+    }
+
+    List<Widget> returnList = [];
+
+    for (int i in spendingPerAccount.keys) {
+      if (accountUsed[i] ?? false) {
+        returnList.add(Container(
+          margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
+          height: 40,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                  widget.datastore.accountList
+                      .firstWhere((element) => element.id == i)
+                      .caption,
+                  style: GoogleFonts.lato(
+                      textStyle: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w400))),
+              Spacer(),
+              Text(spendingPerAccount[i]!.toString(),
+                  style: GoogleFonts.lato(
+                      textStyle: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w400)))
+            ],
+          ),
+        ));
+      }
+    }
+    return returnList;
+  }
+
+  List<Widget> spendingByCategory() {
     if (spendingPerCategory.isEmpty) {
       return [Container()];
     }
@@ -105,18 +199,19 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
 
   Widget pieChartCategory() {
     return SfCircularChart(
-        palette: generatePallete(chartData.length),
+        palette: generatePallete(pieChartData.length),
         legend: Legend(isVisible: true, position: LegendPosition.bottom),
-        series: <DoughnutSeries<_ChartData, String>>[
-          DoughnutSeries<_ChartData, String>(
+        tooltipBehavior: TooltipBehavior(enable: true),
+        series: <DoughnutSeries<_PieChartData, String>>[
+          DoughnutSeries<_PieChartData, String>(
             explode: true,
             animationDuration: 650,
             radius: "100",
             innerRadius: "45",
-            dataSource: chartData,
-            xValueMapper: (_ChartData data, _) => data.xData,
-            yValueMapper: (_ChartData data, _) => data.yData * -1,
-            dataLabelMapper: (_ChartData data, _) => data.xData,
+            dataSource: pieChartData,
+            xValueMapper: (_PieChartData data, _) => data.xData,
+            yValueMapper: (_PieChartData data, _) => data.yData * -1,
+            dataLabelMapper: (_PieChartData data, _) => data.xData,
             dataLabelSettings: DataLabelSettings(
                 isVisible: true,
                 textStyle: GoogleFonts.lato(
@@ -129,36 +224,20 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
   }
 
   Widget barChartCategory() {
-    if (chartData.isEmpty) {
+    if (pieChartData.isEmpty) {
       return Container(child: Center(child: Text("No Data Found")));
     }
 
     return SfCartesianChart(
-        primaryXAxis: CategoryAxis(
-            labelStyle: GoogleFonts.lato(
-                textStyle: const TextStyle(fontWeight: FontWeight.w700))),
-        primaryYAxis: NumericAxis(
-            minimum: 0,
-            maximum: (chartData
-                            .map((e) => e.yData / totalSpending * 10)
-                            .toList()
-                            .reduce(max) +
-                        1)
-                    .floor() *
-                10,
-            interval: 10),
-        tooltipBehavior: TooltipBehavior(enable: false),
-        series: <ChartSeries<_ChartData, String>>[
-          ColumnSeries<_ChartData, String>(
-              animationDuration: 650,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(7)),
-              dataSource: chartData,
-              xValueMapper: (_ChartData data, _) => data.xData,
-              yValueMapper: (_ChartData data, _) =>
-                  (data.yData) / totalSpending * 100,
-              name: "Spending",
-              color: Colors.blue.shade300)
-        ]);
+      palette: generatePallete(widget.datastore.accountList.length),
+      primaryXAxis: CategoryAxis(),
+      tooltipBehavior: TooltipBehavior(enable: true),
+      series: seriesData,
+      legend: Legend(
+          isVisible: true,
+          position: LegendPosition.bottom,
+          overflowMode: LegendItemOverflowMode.wrap),
+    );
   }
 
   @override
@@ -167,7 +246,7 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
             backgroundColor: Colors.white,
-            body: chartData.isEmpty
+            body: pieChartData.isEmpty
                 ? Container(child: Center(child: Text("No Data Found")))
                 : Column(
                     children: [
@@ -178,7 +257,10 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
                           children: [
                             Container(
                               padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                              child: Text("Spending Per Category",
+                              child: Text(
+                                  showPieChart
+                                      ? "Spending Per Category"
+                                      : "Spending Per Category/Account",
                                   style: GoogleFonts.lato(
                                       textStyle: const TextStyle(
                                           fontSize: 20,
@@ -189,6 +271,9 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
                                 margin: const EdgeInsets.fromLTRB(0, 0, 15, 0),
                                 child: IconButton(
                                     onPressed: () {
+                                      widget.datastore.setPref(
+                                          "show_pieChart", !showPieChart);
+
                                       setState(() {
                                         showPieChart = !showPieChart;
                                       });
@@ -205,26 +290,36 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
                       ),
                       Expanded(
                           child: SingleChildScrollView(
-                            scrollDirection: Axis.vertical,
-                            child: MediaQuery.removePadding(
-                              removeTop: true,
-                              context: context,
-                              child: ListView(
-                                primary: false,
-                                shrinkWrap: true,
-                                children: spendingHistory(),
-                              ),
-                            ),
-                          ))
+                        scrollDirection: Axis.vertical,
+                        child: MediaQuery.removePadding(
+                          removeTop: true,
+                          context: context,
+                          child: ListView(
+                            primary: false,
+                            shrinkWrap: true,
+                            children: showPieChart
+                                ? spendingByCategory()
+                                : spendingByAccountList(),
+                          ),
+                        ),
+                      ))
                     ],
                   )));
   }
 }
 
-class _ChartData {
-  _ChartData(this.xData, this.yData, [this.text]);
+class _PieChartData {
+  _PieChartData(this.xData, this.yData, [this.text]);
 
   final String xData;
   final num yData;
+  final String? text;
+}
+
+class _ColumnChartData {
+  _ColumnChartData(this.xData, this.yData, [this.text]);
+
+  final String xData;
+  final Map<int, double> yData;
   final String? text;
 }

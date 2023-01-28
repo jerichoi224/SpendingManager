@@ -25,7 +25,6 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
 
   Map<int, dynamic> spendingPerDay = {}; // date -> [dailytotal, acctotal, day]
   double totalSpending = 0;
-  int pieChartSelectIndex = -1;
   List<_TargetChartData> chartData = [];
   double dailyTarget = 0;
   @override

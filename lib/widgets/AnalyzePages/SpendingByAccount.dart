@@ -25,7 +25,7 @@ class _SpendingByAccountState extends State<SpendingByAccountWidget> {
   Map<int, bool> categoryUsed = {};
   double totalSpending = 0;
   int pieChartSelectIndex = -1;
-  List<_ChartData> chartData = [];
+  List<_ColumnChartData> columnChartData = [];
   List<ChartSeries> seriesData = [];
   late List<int> sortedKeys;
   bool showPieChart = true;
@@ -48,48 +48,46 @@ class _SpendingByAccountState extends State<SpendingByAccountWidget> {
       return;
     }
 
-    for (AccountEntry acc in widget.datastore.accountList) {
-      Map<int, double> categoryForAcc = {};
-      for (CategoryEntry c in widget.datastore.categoryList) {
-        categoryForAcc[c.id] = 0;
+    for (CategoryEntry c in widget.datastore.categoryList) {
+      Map<int, double> accForCategory = {};
+      for (AccountEntry acc in widget.datastore.accountList) {
+        accForCategory[acc.id] = 0;
       }
-      spendingByAccount[acc.id] = categoryForAcc;
+      spendingByAccount[c.id] = accForCategory;
     }
 
     for (SpendingEntry entry in widget.monthlyList) {
       if (!entry.excludeFromSpending) {
-        double val = spendingByAccount[entry.accId]![entry.tagId] ?? 0;
-        spendingByAccount[entry.accId]![entry.tagId] = val + entry.value * -1;
+        double val = spendingByAccount[entry.tagId]![entry.accId] ?? 0;
+        spendingByAccount[entry.tagId]![entry.accId] = val + entry.value * -1;
         categoryUsed[entry.tagId] = true;
         accountUsed[entry.accId] = true;
       }
     }
 
-    for (int acc in spendingByAccount.keys) {
-      if (accountUsed[acc] ?? false) {
+    for (int tag in spendingByAccount.keys) {
+      if (categoryUsed[tag] ?? false) {
         Map<int, double> spentByCat = {};
-        for (CategoryEntry c in widget.datastore.categoryList) {
-          spentByCat[c.id] = spendingByAccount[acc]![c.id] ?? 0;
-//          print("$acc, ${c.id}, ${c.caption}, ${spentByCat[c.id]}");
-
+        for (AccountEntry acc in widget.datastore.accountList) {
+          spentByCat[acc.id] = spendingByAccount[tag]![acc.id] ?? 0;
         }
-        chartData.add(_ChartData(
-            widget.datastore.accountList
-                .firstWhere((element) => element.id == acc)
+        columnChartData.add(_ColumnChartData(
+            widget.datastore.categoryList
+                .firstWhere((element) => element.id == tag)
                 .caption,
             spentByCat));
       }
     }
 
-    for (CategoryEntry c in widget.datastore.categoryList) {
-      if (true && (categoryUsed[c.id] ?? false)) {
-//        () {
-        seriesData.add(StackedColumnSeries<_ChartData, String>(
-            dataSource: chartData,
+    for (AccountEntry acc in widget.datastore.accountList) {
+      if (true && (accountUsed[acc.id] ?? false)) {
+        seriesData.add(ColumnSeries<_ColumnChartData, String>(
             animationDuration: 650,
-            name: c.caption,
-            xValueMapper: (_ChartData data, _) => data.xData,
-            yValueMapper: (_ChartData data, _) => data.yData[c.id]));
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
+            dataSource: columnChartData,
+            name: acc.caption,
+            xValueMapper: (_ColumnChartData data, _) => data.xData,
+            yValueMapper: (_ColumnChartData data, _) => data.yData[acc.id]));
       }
     }
   }
@@ -150,7 +148,7 @@ class _SpendingByAccountState extends State<SpendingByAccountWidget> {
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
             backgroundColor: Colors.white,
-            body: chartData.isEmpty
+            body: columnChartData.isEmpty
                 ? Container(child: Center(child: Text("No Data Found")))
                 : Column(
                     children: [
@@ -193,8 +191,8 @@ class _SpendingByAccountState extends State<SpendingByAccountWidget> {
   }
 }
 
-class _ChartData {
-  _ChartData(this.xData, this.yData, [this.text]);
+class _ColumnChartData {
+  _ColumnChartData(this.xData, this.yData, [this.text]);
 
   final String xData;
   final Map<int, double> yData;

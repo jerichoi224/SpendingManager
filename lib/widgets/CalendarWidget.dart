@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/dbModels/categoryEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
+import 'package:spending_manager/main.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/enum.dart';
 import 'package:spending_manager/widgets/components/viewEditSpendingPopup.dart';
@@ -21,10 +22,23 @@ class CalendarWidget extends StatefulWidget {
 }
 
 class _CalendarState extends State<CalendarWidget> {
+  Map<String, CalendarFormat> calendarFormatMap = {
+    'Month': CalendarFormat.month,
+    '2 weeks': CalendarFormat.twoWeeks,
+    'Week': CalendarFormat.week,
+  };
+  Map<CalendarFormat, String> calendarFormatnameMap = {
+    CalendarFormat.month: 'Month',
+    CalendarFormat.twoWeeks: '2 weeks',
+    CalendarFormat.week: 'Week',
+  };
+
   Map<int, Color> itemTypeColor = {
     ItemType.income.intVal: Colors.blue,
     ItemType.expense.intVal: Colors.black,
   };
+
+  CalendarFormat _calendarFormat = CalendarFormat.week;
 
   Map<int, String> AccIdString = {};
 
@@ -35,6 +49,10 @@ class _CalendarState extends State<CalendarWidget> {
   @override
   void initState() {
     updateState();
+    if (widget.datastore.prefMap.keys.contains("calendar_format")) {
+      _calendarFormat =
+          calendarFormatMap[widget.datastore.getPref("calendar_format")]!;
+    }
     for (AccountEntry entry in widget.datastore.accountList) {
       AccIdString[entry.id] = entry.caption;
     }
@@ -243,10 +261,19 @@ class _CalendarState extends State<CalendarWidget> {
                   firstDay: DateTime.utc(2010, 10, 16),
                   lastDay: DateTime.utc(2030, 3, 14),
                   focusedDay: _focusedDay,
-                  calendarFormat: CalendarFormat.week,
-                  headerStyle: const HeaderStyle(formatButtonVisible: false),
+                  calendarFormat: _calendarFormat,
                   selectedDayPredicate: (day) {
                     return isSameDay(_selectedDay, day);
+                  },
+                  onFormatChanged: (format) {
+                    if (_calendarFormat != format) {
+                      widget.datastore.setPref(
+                          "calendar_format", calendarFormatnameMap[format]);
+                      // Call `setState()` when updating calendar format
+                      setState(() {
+                        _calendarFormat = format;
+                      });
+                    }
                   },
                   onDaySelected: (selectedDay, focusedDay) {
                     if (!isSameDay(_selectedDay, selectedDay)) {
