@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/StringUtil.dart';
 import 'package:spending_manager/util/dbTool.dart';
+import 'package:spending_manager/util/numberFormat.dart';
 import 'package:spending_manager/widgets/components/datePicker.dart';
 import 'package:spending_manager/widgets/components/dropdownComponent.dart';
 
@@ -33,8 +34,9 @@ TextStyle latoFont(double size) {
 
 Future<dynamic> viewEditTransferPopup(
     BuildContext context, Datastore datastore, int spendingId) async {
-  TextEditingController noteController = TextEditingController();
-  TextEditingController amountController = TextEditingController();
+  String locale = "ko_KR";
+  bool useDecimal = usesDecimal(locale);
+
   SpendingEntry item =
       datastore.spendingList.firstWhere((element) => element.id == spendingId);
   String fromAccount = datastore.accountList
@@ -50,7 +52,14 @@ Future<dynamic> viewEditTransferPopup(
 
   DateTime date = DateTime.fromMillisecondsSinceEpoch(item.dateTime);
 
-  amountController.text = item.value.abs().toString();
+  TextEditingController amountController = TextEditingController();
+  if (!useDecimal) {
+    amountController.text = item.value.abs().toInt().toString();
+  } else {
+    amountController.text = item.value.abs().toString();
+  }
+
+  TextEditingController noteController = TextEditingController();
   noteController.text = item.caption;
   return showDialog(
       context: context,
@@ -75,7 +84,7 @@ Future<dynamic> viewEditTransferPopup(
                                 style: latoFont(24),
                               ),
                               const Spacer(),
-                              datePicker(context, date, (DateTime newVal){
+                              datePicker(context, date, (DateTime newVal) {
                                 setState(() {
                                   date = newVal;
                                 });
@@ -157,14 +166,21 @@ Future<dynamic> viewEditTransferPopup(
                                   ),
                                 ),
                                 margin: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                                child: TextField(
-                                    decoration: const InputDecoration(
-                                      border: InputBorder.none,
-                                    ),
-                                    textAlign: TextAlign.end,
-                                    controller: amountController,
-                                    keyboardType: TextInputType.number,
-                                    style: latoFont(16)),
+                                child: TextFormField(
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                  ),
+                                  textAlign: TextAlign.end,
+                                  controller: amountController,
+                                  keyboardType: TextInputType.number,
+                                  style: latoFont(16),
+                                  inputFormatters: [
+                                    useDecimal
+                                        ? FilteringTextInputFormatter.allow(
+                                            RegExp(r'^\d+\.?\d{0,2}'))
+                                        : FilteringTextInputFormatter.digitsOnly
+                                  ],
+                                ),
                               ),
                             ],
                           ),

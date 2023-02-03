@@ -102,7 +102,7 @@ final _entities = <ModelEntity>[
   ModelEntity(
       id: const IdUid(3, 6876147056865672656),
       name: 'CategoryEntry',
-      lastPropertyId: const IdUid(3, 3574373731886766926),
+      lastPropertyId: const IdUid(5, 7028775727629461499),
       flags: 0,
       properties: <ModelProperty>[
         ModelProperty(
@@ -119,6 +119,16 @@ final _entities = <ModelEntity>[
             id: const IdUid(3, 3574373731886766926),
             name: 'iconId',
             type: 6,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(4, 1057013297611123348),
+            name: 'show',
+            type: 1,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(5, 7028775727629461499),
+            name: 'basic',
+            type: 1,
             flags: 0)
       ],
       relations: <ModelRelation>[],
@@ -250,10 +260,12 @@ ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (CategoryEntry object, fb.Builder fbb) {
           final captionOffset = fbb.writeString(object.caption);
-          fbb.startTable(4);
+          fbb.startTable(6);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, captionOffset);
           fbb.addInt64(2, object.iconId);
+          fbb.addBool(3, object.show);
+          fbb.addBool(4, object.basic);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -265,8 +277,12 @@ ModelDefinition getObjectBoxModel() {
               caption: const fb.StringReader(asciiOptimization: true)
                   .vTableGet(buffer, rootOffset, 6, ''),
               iconId:
-                  const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0))
-            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+                  const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0),
+              basic: const fb.BoolReader()
+                  .vTableGet(buffer, rootOffset, 12, false))
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+            ..show =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 10, false);
 
           return object;
         })
@@ -342,4 +358,12 @@ class CategoryEntry_ {
   /// see [CategoryEntry.iconId]
   static final iconId =
       QueryIntegerProperty<CategoryEntry>(_entities[2].properties[2]);
+
+  /// see [CategoryEntry.show]
+  static final show =
+      QueryBooleanProperty<CategoryEntry>(_entities[2].properties[3]);
+
+  /// see [CategoryEntry.basic]
+  static final basic =
+      QueryBooleanProperty<CategoryEntry>(_entities[2].properties[4]);
 }

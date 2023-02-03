@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/widgets/AnalyzePages/SpendingByCategoryWidget.dart';
-import 'package:spending_manager/widgets/AnalyzePages/SpendingByAccount.dart';
+import 'package:spending_manager/widgets/AnalyzePages/AverageSpendingWidget.dart';
 import 'package:spending_manager/widgets/AnalyzePages/TargetSpendingWidget.dart';
 import 'package:floating_bottom_navigation_bar/floating_bottom_navigation_bar.dart';
 
@@ -104,7 +104,7 @@ class _AnalyzeState extends State<AnalyzeWidget> {
           backgroundColor: Colors.white,
           body: SizedBox(
               width: mediaQueryData.size.width,
-              height: mediaQueryData.size.height - 64, // 64 = bottomnavbar
+              height: mediaQueryData.size.height - 64,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -114,7 +114,7 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                   monthSelector(),
                   Expanded(
                     child: PageView(
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       onPageChanged: (index) {
                         FocusScope.of(context).unfocus();
                         changePage(index);
@@ -129,10 +129,10 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                             key: UniqueKey(),
                             datastore: widget.datastore,
                             monthlyList: monthlyList),
-                        /*SpendingByAccountWidget(
+                        AverageSpendingWidget(
                             key: UniqueKey(),
                             datastore: widget.datastore,
-                            monthlyList: monthlyList),*/
+                            monthlyList: monthlyList),
                       ],
                     ),
                   )
@@ -158,8 +158,8 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                         icon: CarbonIcons.tag, title: 'Category'),
                     FloatingNavbarItem(
                         icon: CarbonIcons.chart_line, title: 'Target'),
-                  //  FloatingNavbarItem(
-                    //    icon: CarbonIcons.account, title: 'Account'),
+                    FloatingNavbarItem(
+                        icon: CarbonIcons.account, title: 'Average'),
 //              FloatingNavbarItem(icon: CarbonIcons.chart_combo, title: 'Average'),
                   ],
                 ),

@@ -6,6 +6,7 @@ import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/enum.dart';
+import 'package:spending_manager/util/numberFormat.dart';
 import 'package:spending_manager/widgets/components/datePicker.dart';
 import 'package:spending_manager/widgets/components/keyboardWidget.dart';
 import 'package:spending_manager/widgets/components/selectFromListPopup.dart';
@@ -33,6 +34,8 @@ class _SpendState extends State<SpendWidget> {
 
   List<CategoryEntry> categoryList = [];
   List<AccountEntry> accountList = [];
+
+  String locale = "ko_KR";
 
   @override
   void initState() {
@@ -184,7 +187,7 @@ class _SpendState extends State<SpendWidget> {
                       children: [
                         const Spacer(),
                         //************ DATE ************//
-                        datePicker(context, date, (DateTime newVal){
+                        datePicker(context, date, (DateTime newVal) {
                           setState(() {
                             date = newVal;
                           });
@@ -200,7 +203,8 @@ class _SpendState extends State<SpendWidget> {
                               Text(
                                 valueEditingController.text.isEmpty
                                     ? "0"
-                                    : valueEditingController.text,
+                                    : moneyFormat(valueEditingController.text,
+                                        locale, true),
                                 style: const TextStyle(fontSize: 46),
                               ),
                               const Spacer(),
@@ -288,6 +292,10 @@ class _SpendState extends State<SpendWidget> {
                                             await selectFromList(
                                                 context,
                                                 categoryList
+                                                    .where((item) {
+                                                      return item.caption !=
+                                                          "Transfer";
+                                                    })
                                                     .map((e) => e.caption)
                                                     .toList());
                                         if (newAccount.isNotEmpty) {

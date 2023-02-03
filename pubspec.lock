@@ -273,6 +273,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.2"
+  fluentui_system_icons:
+    dependency: "direct main"
+    description:
+      name: fluentui_system_icons
+      sha256: b7fd3f18a6431fe0c63610c7c6f46e48b5471104a9460678fb0e661230911bf7
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.190"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -437,6 +445,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
+  material_design_icons_flutter:
+    dependency: "direct main"
+    description:
+      name: material_design_icons_flutter
+      sha256: "8ef8562d16e747b2d93e5da5c2508931588939c5c00ebc8e2768e803db7dfd3c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.7096"
   meta:
     dependency: transitive
     description:
@@ -851,5 +867,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.18.0 <4.0.0"
+  dart: ">=2.18.0 <3.0.0"
   flutter: ">=3.0.0"

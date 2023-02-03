@@ -4,8 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/dbModels/categoryEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
+import 'package:spending_manager/util/colorGenerator.dart';
 import 'package:spending_manager/util/dbTool.dart';
-import 'package:flutter_color_models/flutter_color_models.dart';
+import 'package:spending_manager/util/numberFormat.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class SpendingByCategoryWidget extends StatefulWidget {
@@ -21,6 +22,8 @@ class SpendingByCategoryWidget extends StatefulWidget {
 }
 
 class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
+  String locale = "ko_KR";
+
   Map<int, String> tagMap = {}; // tagid to string
   Map<int, double> spendingPerCategory = {}; // tag -> amount
   Map<int, double> spendingPerAccount = {}; // account -> amount
@@ -122,7 +125,6 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
 
   List<Widget> spendingByAccountList() {
     if (spendingPerAccount.isEmpty) {
-      print("empty");
       return [Container()];
     }
 
@@ -143,8 +145,8 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
                   style: GoogleFonts.lato(
                       textStyle: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w400))),
-              Spacer(),
-              Text(spendingPerAccount[i]!.toString(),
+              const Spacer(),
+              Text(moneyFormat(spendingPerAccount[i]!.toString(), locale, true),
                   style: GoogleFonts.lato(
                       textStyle: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w400)))
@@ -176,7 +178,9 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
                     textStyle: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w400))),
             Spacer(),
-            Text((spendingPerCategory[i]! * -1).toString(),
+            Text(
+                moneyFormat(
+                    (spendingPerCategory[i]! * -1).toString(), locale, true),
                 style: GoogleFonts.lato(
                     textStyle: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w400)))
@@ -185,16 +189,6 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
       ));
     }
     return returnList;
-  }
-
-  List<Color> generatePallete(int n) {
-    List<Color> pallete = [];
-    Color color = Colors.blue.shade200;
-    for (int i = 0; i < n; i++) {
-      HslColor hslColor = HslColor.fromColor(color);
-      pallete.add(hslColor.rotateHue((360 / n * i) % 360).toColor());
-    }
-    return pallete;
   }
 
   Widget pieChartCategory() {
@@ -216,9 +210,6 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
                 isVisible: true,
                 textStyle: GoogleFonts.lato(
                     textStyle: const TextStyle(fontWeight: FontWeight.w400))),
-            onPointTap: (ChartPointDetails pointInteractionDetails) {
-              print(pointInteractionDetails.pointIndex);
-            },
           ),
         ]);
   }

@@ -6,6 +6,7 @@ import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/StringUtil.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/enum.dart';
+import 'package:spending_manager/util/numberFormat.dart';
 import 'package:spending_manager/widgets/components/datePicker.dart';
 import 'package:spending_manager/widgets/components/dropdownComponent.dart';
 
@@ -34,8 +35,9 @@ TextStyle latoFont(double size) {
 
 Future<dynamic> viewEditSpendingPopup(
     BuildContext context, Datastore datastore, int spendingId) async {
-  TextEditingController noteController = TextEditingController();
-  TextEditingController amountController = TextEditingController();
+  String locale = "ko_KR";
+  bool useDecimal = usesDecimal(locale);
+
   SpendingEntry item =
       datastore.spendingList.firstWhere((element) => element.id == spendingId);
   String selectedAccount = datastore.accountList
@@ -46,10 +48,22 @@ Future<dynamic> viewEditSpendingPopup(
       .firstWhere((element) => element.id == item.tagId)
       .caption;
 
+  bool exclude = item.itemType == ItemType.expense.intVal
+      ? item.excludeFromSpending
+      : item.excludeFromIncome;
+
   DateTime date = DateTime.fromMillisecondsSinceEpoch(item.dateTime);
 
-  amountController.text = item.value.abs().toString();
+  TextEditingController amountController = TextEditingController();
+  if (!useDecimal) {
+    amountController.text = item.value.abs().toInt().toString();
+  } else {
+    amountController.text = item.value.abs().toString();
+  }
+
+  TextEditingController noteController = TextEditingController();
   noteController.text = item.caption;
+
   return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -59,7 +73,7 @@ Future<dynamic> viewEditSpendingPopup(
               child: AlertDialog(
                   scrollable: true,
                   content: Container(
-                    height: 400,
+                    height: 450,
                     margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                     width: MediaQuery.of(context).size.width,
                     child: Column(
@@ -161,13 +175,18 @@ Future<dynamic> viewEditSpendingPopup(
                                   ),
                                 ),
                                 margin: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                                child: TextField(
+                                child: TextFormField(
                                     decoration: const InputDecoration(
                                       border: InputBorder.none,
                                     ),
                                     textAlign: TextAlign.end,
                                     controller: amountController,
                                     keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      useDecimal ?
+                                      FilteringTextInputFormatter.allow(
+                                          RegExp(r'^\d+\.?\d{0,2}')) : FilteringTextInputFormatter.digitsOnly
+                                    ],
                                     style: latoFont(16)),
                               ),
                             ],
@@ -202,39 +221,75 @@ Future<dynamic> viewEditSpendingPopup(
                         ),
                         Row(
                           children: [
-                            const Spacer(),
-                            actionButton("Delete", () {
-                              datastore.spendingBox.remove(item.id);
-                              datastore.spendingList =
-                                  datastore.spendingBox.getAll();
-                              Navigator.pop(context, true);
-                            }),
-                            actionButton("Save", () {
-                              item.caption = noteController.text;
-                              if (!amountController.text.isNumeric()) return;
-                              item.value = double.parse(amountController.text);
-                              if (item.itemType == ItemType.expense.intVal) {
-                                item.value *= -1;
-                              }
-
-                              item.accId = datastore.accountList
-                                  .firstWhere((element) =>
-                                      element.caption == selectedAccount)
-                                  .id;
-                              item.tagId = datastore.categoryList
-                                  .firstWhere((element) =>
-                                      element.caption == selectedTag)
-                                  .id;
-                              item.dateTime = date.millisecondsSinceEpoch;
-
-
-                              datastore.spendingBox.put(item);
-                              datastore.spendingList =
-                                  datastore.spendingBox.getAll();
-                              Navigator.pop(context, true);
-                            }),
+                            Container(
+                              height: 24.0,
+                              width: 24.0,
+                              padding: const EdgeInsets.fromLTRB(5, 5, 0, 0),
+                              child: Checkbox(
+                                checkColor: Colors.white,
+                                value: exclude,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    exclude = value!;
+                                  });
+                                },
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.fromLTRB(10, 5, 0, 0),
+                              child: Text(
+                                item.itemType == ItemType.expense.intVal
+                                    ? "Exclude from Spending"
+                                    : "Exclude from Income",
+                                style: latoFont(14),
+                              ),
+                            )
                           ],
                         ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                          child: Row(
+                            children: [
+                              const Spacer(),
+                              actionButton("Delete", () {
+                                datastore.spendingBox.remove(item.id);
+                                datastore.spendingList =
+                                    datastore.spendingBox.getAll();
+                                Navigator.pop(context, true);
+                              }),
+                              actionButton("Save", () {
+                                item.caption = noteController.text;
+                                if (!amountController.text.isNumeric()) return;
+                                item.value =
+                                    double.parse(amountController.text);
+                                if (item.itemType == ItemType.expense.intVal) {
+                                  item.value *= -1;
+                                }
+
+                                item.accId = datastore.accountList
+                                    .firstWhere((element) =>
+                                        element.caption == selectedAccount)
+                                    .id;
+                                item.tagId = datastore.categoryList
+                                    .firstWhere((element) =>
+                                        element.caption == selectedTag)
+                                    .id;
+                                item.dateTime = date.millisecondsSinceEpoch;
+
+                                if (item.itemType == ItemType.expense.intVal) {
+                                  item.excludeFromSpending = exclude;
+                                } else {
+                                  item.excludeFromIncome = exclude;
+                                }
+
+                                datastore.spendingBox.put(item);
+                                datastore.spendingList =
+                                    datastore.spendingBox.getAll();
+                                Navigator.pop(context, true);
+                              }),
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   )));

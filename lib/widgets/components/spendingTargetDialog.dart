@@ -6,6 +6,7 @@ import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/StringUtil.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/enum.dart';
+import 'package:spending_manager/util/numberFormat.dart';
 import 'package:spending_manager/widgets/components/datePicker.dart';
 import 'package:spending_manager/widgets/components/dropdownComponent.dart';
 
@@ -36,9 +37,15 @@ TextStyle latoFont(double size) {
 
 Future<dynamic> spendingTargetDialog(
     BuildContext context, Datastore datastore) async {
+  String locale = "ko_KR";
+  bool useDecimal = usesDecimal(locale);
   TextEditingController targetController = TextEditingController();
   double dailyTarget = datastore.getPref("daily_target") ?? 0;
-  targetController.text = dailyTarget.toString();
+  if (!useDecimal) {
+    targetController.text = dailyTarget.toInt().toString();
+  } else {
+    targetController.text = dailyTarget.toString();
+  }
 
   return showDialog(
       context: context,
@@ -78,6 +85,12 @@ Future<dynamic> spendingTargetDialog(
                               textAlign: TextAlign.end,
                               controller: targetController,
                               keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                useDecimal
+                                    ? FilteringTextInputFormatter.allow(
+                                        RegExp(r'^\d+\.?\d{0,2}'))
+                                    : FilteringTextInputFormatter.digitsOnly
+                              ],
                               style: latoFont(16)),
                         ),
                         Row(
@@ -87,7 +100,8 @@ Future<dynamic> spendingTargetDialog(
                               Navigator.pop(context, false);
                             }),
                             actionButton("Save", () {
-                              datastore.setPref("daily_target", double.parse(targetController.text));
+                              datastore.setPref("daily_target",
+                                  double.parse(targetController.text));
                               Navigator.pop(context, true);
                             }),
                           ],

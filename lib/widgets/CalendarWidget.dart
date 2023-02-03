@@ -1,13 +1,14 @@
-import 'package:carbon_icons/carbon_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/dbModels/categoryEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
-import 'package:spending_manager/main.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/enum.dart';
+import 'package:spending_manager/util/numberFormat.dart';
+import 'package:spending_manager/util/categoryIconMap.dart';
 import 'package:spending_manager/widgets/components/viewEditSpendingPopup.dart';
 import 'package:spending_manager/widgets/components/viewEditTransferPopup.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -40,11 +41,13 @@ class _CalendarState extends State<CalendarWidget> {
 
   CalendarFormat _calendarFormat = CalendarFormat.week;
 
-  Map<int, String> AccIdString = {};
+  Map<int, String> accIdString = {};
 
   List<SpendingEntry> entryList = [];
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+
+  String locale = "ko_KR";
 
   @override
   void initState() {
@@ -54,7 +57,7 @@ class _CalendarState extends State<CalendarWidget> {
           calendarFormatMap[widget.datastore.getPref("calendar_format")]!;
     }
     for (AccountEntry entry in widget.datastore.accountList) {
-      AccIdString[entry.id] = entry.caption;
+      accIdString[entry.id] = entry.caption;
     }
 
     super.initState();
@@ -87,7 +90,7 @@ class _CalendarState extends State<CalendarWidget> {
     }
 
     return Text(
-      text,
+      moneyFormat(text, locale, true),
       style: GoogleFonts.lato(
           textStyle: TextStyle(
               fontSize: 16,
@@ -103,11 +106,15 @@ class _CalendarState extends State<CalendarWidget> {
         .firstWhere((element) => element.id == item.tagId);
     var result = false;
     if (tag.caption == "Transfer") {
-      result = await viewEditTransferPopup(context, widget.datastore, entryId);
+      result =
+          await viewEditTransferPopup(context, widget.datastore, entryId) ??
+              false;
     } else {
-      result = await viewEditSpendingPopup(context, widget.datastore, entryId);
+      result =
+          await viewEditSpendingPopup(context, widget.datastore, entryId) ??
+              false;
     }
-    if (result.runtimeType == bool && result) {
+    if (result) {
       setState(() {
         updateState();
       });
@@ -118,7 +125,7 @@ class _CalendarState extends State<CalendarWidget> {
     if (entryList.isEmpty) {
       return [
         Container(
-            margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+            margin: const EdgeInsets.fromLTRB(0, 20, 0, 0),
             child: const Center(child: Text("No record found")))
       ];
     }
@@ -158,12 +165,14 @@ class _CalendarState extends State<CalendarWidget> {
                 ),
               ),
               const Spacer(),
-              Text(
-                dayExpense.toString(),
-                style: GoogleFonts.lato(
-                    textStyle: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w600)),
-              )
+              dayExpense != 0
+                  ? Text(
+                      moneyFormat(dayExpense.toString(), locale, true),
+                      style: GoogleFonts.lato(
+                          textStyle: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600)),
+                    )
+                  : Container(),
             ],
           ),
         ));
@@ -191,7 +200,10 @@ class _CalendarState extends State<CalendarWidget> {
                     child: ListTile(
                         visualDensity: const VisualDensity(vertical: -2),
                         dense: false,
-                        leading: const Icon(CarbonIcons.arrows_horizontal),
+                        leading: Icon(
+                          categoryIconMap[item.tagId],
+                          color: Colors.black,
+                        ),
                         title: Text(
                           item.caption,
                           style: GoogleFonts.lato(
@@ -199,7 +211,7 @@ class _CalendarState extends State<CalendarWidget> {
                             fontSize: 16,
                           )),
                         ),
-                        subtitle: Text(AccIdString[item.recAccId]!),
+                        subtitle: Text(accIdString[item.recAccId]!),
                         trailing: moneyText(item, true)))));
           }
           historyList.add(Container(
@@ -212,9 +224,13 @@ class _CalendarState extends State<CalendarWidget> {
                   openSpendingItem(context, item.id);
                 },
                 child: ListTile(
-                    visualDensity: VisualDensity(vertical: -2),
+                    visualDensity: const VisualDensity(vertical: -2),
                     dense: false,
-                    leading: Icon(CarbonIcons.noodle_bowl),
+                    leading: Icon(
+                      categoryIconMap[item.tagId],
+                      color: Colors.black,
+                      size: 28,
+                    ),
                     title: Text(
                       item.caption,
                       style: GoogleFonts.lato(
@@ -222,7 +238,7 @@ class _CalendarState extends State<CalendarWidget> {
                         fontSize: 16,
                       )),
                     ),
-                    subtitle: Text(AccIdString[item.accId]!),
+                    subtitle: Text(accIdString[item.accId]!),
                     trailing: moneyText(item, false)),
               )));
         }
@@ -234,10 +250,12 @@ class _CalendarState extends State<CalendarWidget> {
         dayIncome = 0;
       }
 
-      if (entry.itemType == ItemType.expense.intVal) {
+      if (entry.itemType == ItemType.expense.intVal &&
+          !entry.excludeFromSpending) {
         dayExpense += entry.value;
       }
-      if (entry.itemType == ItemType.income.intVal) {
+      if (entry.itemType == ItemType.income.intVal &&
+          !entry.excludeFromIncome) {
         dayIncome += entry.value;
       }
       tmpList.add(entry);
