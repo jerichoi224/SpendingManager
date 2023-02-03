@@ -46,15 +46,15 @@ class _InstructionState extends State<InstructionWidget>{
 
       widget.datastore.categoryBox.put(CategoryEntry(caption: "Transfer", iconId: 1, basic: true));
       widget.datastore.categoryBox.put(CategoryEntry(caption: "Other", iconId: 2, basic: true));
-      widget.datastore.categoryBox.put(CategoryEntry(caption: "Gift", iconId: 3, basic: true));
-      widget.datastore.categoryBox.put(CategoryEntry(caption: "Food", iconId: 4, basic: true));
-      widget.datastore.categoryBox.put(CategoryEntry(caption: "Cafe", iconId: 5, basic: true));
-      widget.datastore.categoryBox.put(CategoryEntry(caption: "Transportation", iconId: 6, basic: true));
-      widget.datastore.categoryBox.put(CategoryEntry(caption: "Subscription", iconId: 7, basic: true));
-      widget.datastore.categoryBox.put(CategoryEntry(caption: "Shopping", iconId: 8, basic: true));
-      widget.datastore.categoryBox.put(CategoryEntry(caption: "Hobby", iconId: 9, basic: true));
-      widget.datastore.categoryBox.put(CategoryEntry(caption: "Medical", iconId: 10, basic: true));
-      widget.datastore.categoryBox.put(CategoryEntry(caption: "Fitness", iconId: 11, basic: true));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Gift", iconId: 3, basic: false));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Food", iconId: 4, basic: false));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Cafe", iconId: 5, basic: false));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Transportation", iconId: 6, basic: false));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Subscription", iconId: 7, basic: false));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Shopping", iconId: 8, basic: false));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Hobby", iconId: 9, basic: false));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Medical", iconId: 10, basic: false));
+      widget.datastore.categoryBox.put(CategoryEntry(caption: "Fitness", iconId: 11, basic: false));
       widget.datastore.categoryList = widget.datastore.categoryBox.getAll();
 
       widget.datastore.setPref('show_instruction', false);

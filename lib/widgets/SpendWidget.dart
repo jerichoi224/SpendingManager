@@ -1,5 +1,6 @@
 import 'package:carbon_icons/carbon_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:spending_manager/dbModels/categoryEntry.dart';
 import 'package:spending_manager/dbModels/accountEntry.dart';
@@ -41,7 +42,7 @@ class _SpendState extends State<SpendWidget> {
   void initState() {
     super.initState();
     categoryList = widget.datastore.categoryList;
-    accountList = widget.datastore.accountList;
+    accountList = widget.datastore.accountList.where((element) => element.show).toList();
     resetAll();
     valueEditingController.addListener(() {
       FocusManager.instance.primaryFocus?.unfocus();
@@ -86,8 +87,9 @@ class _SpendState extends State<SpendWidget> {
                 highlightColor: Colors.blue,
                 onTap: () {
                   if (caption == "Transfer" && accountList.length < 2) {
-                    showSnackBar(context,
-                        "You cannot Transfer with less than 2 accounts");
+                    Fluttertoast.showToast(
+                      msg: "You cannot transfer with one account",
+                    );
                   } else {
                     setState(() {
                       itemType = ItemType.values.byName(caption.toLowerCase());
@@ -401,9 +403,12 @@ class _SpendState extends State<SpendWidget> {
                                   )),
                             )),
                         //************ Keyboard ************//
-                        Center(
-                          child: customKeyboard(
-                              valueEditingController, textLimit, null),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(0, 0, 0, 15),
+                          child: Center(
+                            child: customKeyboard(
+                                valueEditingController, textLimit, null),
+                          ),
                         )
                       ],
                     )))));

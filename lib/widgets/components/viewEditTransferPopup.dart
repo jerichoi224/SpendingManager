@@ -2,6 +2,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/StringUtil.dart';
 import 'package:spending_manager/util/dbTool.dart';
@@ -59,6 +60,16 @@ Future<dynamic> viewEditTransferPopup(
     amountController.text = item.value.abs().toString();
   }
 
+  List<AccountEntry> accountList = datastore.accountList.where((element) => element.show).toList();
+  AccountEntry acc = datastore.accountList.firstWhere((element) => element.id == item.accId);
+  AccountEntry recAcc = datastore.accountList.firstWhere((element) => element.id == item.recAccId);
+  if(!acc.show) {
+    accountList.add(acc);
+  }
+  if(!recAcc.show) {
+    accountList.add(acc);
+  }
+
   TextEditingController noteController = TextEditingController();
   noteController.text = item.caption;
   return showDialog(
@@ -101,7 +112,7 @@ Future<dynamic> viewEditTransferPopup(
                               const Spacer(),
                               dropdownMenu(
                                   context,
-                                  datastore.accountList
+                                  accountList
                                       .map((account) =>
                                           DropdownMenuItem<String>(
                                             value: account.caption,
@@ -129,7 +140,7 @@ Future<dynamic> viewEditTransferPopup(
                               const Spacer(),
                               dropdownMenu(
                                   context,
-                                  datastore.accountList
+                                  accountList
                                       .map((account) =>
                                           DropdownMenuItem<String>(
                                             value: account.caption,

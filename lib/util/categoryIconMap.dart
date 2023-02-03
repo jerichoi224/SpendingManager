@@ -14,5 +14,6 @@ Map<int, IconData> categoryIconMap = {
   8: FluentIcons.shopping_bag_24_regular,
   9: FluentIcons.heart_circle_24_regular,
   10: FluentIcons.briefcase_medical_24_regular,
-  11: FluentIcons.dumbbell_24_regular
+  11: FluentIcons.dumbbell_24_regular,
+  12: FluentIcons.wallet_credit_card_24_regular
 };

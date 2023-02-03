@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:spending_manager/util/dbTool.dart';
+import 'package:spending_manager/widgets/settingsPages/ManageAccountPageWidget.dart';
+import 'package:spending_manager/widgets/settingsPages/ManageTagsPageWidget.dart';
 
 class SettingsWidget extends StatefulWidget {
   late Datastore datastore;
@@ -27,9 +30,9 @@ class _SettingsState extends State<SettingsWidget> {
 
   TextStyle menuCategory = GoogleFonts.lato(
       textStyle: TextStyle(
-          color: Colors.blueAccent.shade700,
+          color: Colors.blueAccent.shade200,
           fontWeight: FontWeight.bold,
-          fontSize: 18));
+          fontSize: 22));
 
   TextStyle menuText = GoogleFonts.lato(
       textStyle: const TextStyle(
@@ -41,6 +44,26 @@ class _SettingsState extends State<SettingsWidget> {
         child: Text(
           text,
           style: style ?? const TextStyle(color: Colors.black),
+        ));
+  }
+
+  void _openManageAccPage() async {
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ManageAccPageWidget(
+            datastore: widget.datastore,
+          ),
+        ));
+  }
+
+  void _openManageTagPage() async {
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ManageTagsPageWidget(
+            datastore: widget.datastore,
+          ),
         ));
   }
 
@@ -75,7 +98,9 @@ class _SettingsState extends State<SettingsWidget> {
                               "Manage Accounts",
                               style: menuText,
                             ),
-                            onTap: () {},
+                            onTap: () {
+                              _openManageAccPage();
+                            },
                           ),
                           ListTile(
                             contentPadding:
@@ -84,7 +109,9 @@ class _SettingsState extends State<SettingsWidget> {
                               "Manage Categories",
                               style: menuText,
                             ),
-                            onTap: () {},
+                            onTap: () {
+                              _openManageTagPage();
+                            },
                           ),
                           div,
                         ])))));

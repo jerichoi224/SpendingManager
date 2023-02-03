@@ -1,3 +1,4 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/widgets/AnalyzeWidget.dart';
@@ -79,24 +80,28 @@ class _HomeState extends State<HomeWidget> {
                 items: const [
                   BottomNavigationBarItem(
                       icon: Icon(
-                        CarbonIcons.money,
+                        FluentIcons.money_hand_24_regular,
                         size: 32,
                       ),
                       label: "Spend"),
                   BottomNavigationBarItem(
                       icon: Icon(
-                        CarbonIcons.calendar,
+                        FluentIcons.calendar_rtl_32_regular,
                         size: 32,
                       ),
                       label: "Calendar"),
                   BottomNavigationBarItem(
                       icon: Icon(
-                        CarbonIcons.chart_combo_stacked,
+                        FluentIcons.chart_multiple_24_regular,
                         size: 32,
                       ),
                       label: "Analyze"),
                   BottomNavigationBarItem(
-                      icon: Icon(CarbonIcons.settings, size: 32,), label: "1"),
+                      icon: Icon(
+                        FluentIcons.settings_24_regular,
+                        size: 32,
+                      ),
+                      label: "1"),
                 ],
               ),
             )));

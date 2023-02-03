@@ -4,6 +4,7 @@ import 'package:objectbox/objectbox.dart';
 class AccountEntry {
   int id = 0;
   String caption = "";
+  bool show = true;
 
   AccountEntry({
     required this.caption,

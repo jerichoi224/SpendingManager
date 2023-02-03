@@ -2,6 +2,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/StringUtil.dart';
 import 'package:spending_manager/util/dbTool.dart';
@@ -64,6 +65,12 @@ Future<dynamic> viewEditSpendingPopup(
   TextEditingController noteController = TextEditingController();
   noteController.text = item.caption;
 
+  List<AccountEntry> accountList = datastore.accountList.where((element) => element.show).toList();
+  AccountEntry acc = datastore.accountList.firstWhere((element) => element.id == item.accId);
+  if(!acc.show) {
+    accountList.add(acc);
+  }
+
   return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -108,7 +115,7 @@ Future<dynamic> viewEditSpendingPopup(
                               const Spacer(),
                               dropdownMenu(
                                   context,
-                                  datastore.accountList
+                                  accountList
                                       .map((account) =>
                                           DropdownMenuItem<String>(
                                             value: account.caption,

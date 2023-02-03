@@ -83,7 +83,7 @@ final _entities = <ModelEntity>[
   ModelEntity(
       id: const IdUid(2, 4628037891868379992),
       name: 'AccountEntry',
-      lastPropertyId: const IdUid(2, 862177462193124388),
+      lastPropertyId: const IdUid(3, 5877470395505109673),
       flags: 0,
       properties: <ModelProperty>[
         ModelProperty(
@@ -95,6 +95,11 @@ final _entities = <ModelEntity>[
             id: const IdUid(2, 862177462193124388),
             name: 'caption',
             type: 9,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(3, 5877470395505109673),
+            name: 'show',
+            type: 1,
             flags: 0)
       ],
       relations: <ModelRelation>[],
@@ -233,9 +238,10 @@ ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (AccountEntry object, fb.Builder fbb) {
           final captionOffset = fbb.writeString(object.caption);
-          fbb.startTable(3);
+          fbb.startTable(4);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, captionOffset);
+          fbb.addBool(2, object.show);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -246,7 +252,9 @@ ModelDefinition getObjectBoxModel() {
           final object = AccountEntry(
               caption: const fb.StringReader(asciiOptimization: true)
                   .vTableGet(buffer, rootOffset, 6, ''))
-            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+            ..show =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 8, false);
 
           return object;
         }),
@@ -343,6 +351,10 @@ class AccountEntry_ {
   /// see [AccountEntry.caption]
   static final caption =
       QueryStringProperty<AccountEntry>(_entities[1].properties[1]);
+
+  /// see [AccountEntry.show]
+  static final show =
+      QueryBooleanProperty<AccountEntry>(_entities[1].properties[2]);
 }
 
 /// [CategoryEntry] entity fields to define ObjectBox queries.

@@ -64,7 +64,7 @@
     },
     {
       "id": "2:4628037891868379992",
-      "lastPropertyId": "2:862177462193124388",
+      "lastPropertyId": "3:5877470395505109673",
       "name": "AccountEntry",
       "properties": [
         {
@@ -77,6 +77,11 @@
           "id": "2:862177462193124388",
           "name": "caption",
           "type": 9
+        },
+        {
+          "id": "3:5877470395505109673",
+          "name": "show",
+          "type": 1
         }
       ],
       "relations": []

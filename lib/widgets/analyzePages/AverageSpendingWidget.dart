@@ -1,13 +1,10 @@
-import 'package:carbon_icons/carbon_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
-import 'package:spending_manager/main.dart';
 import 'package:spending_manager/util/colorGenerator.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/numberFormat.dart';
-import 'package:spending_manager/widgets/components/spendingTargetDialog.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class AverageSpendingWidget extends StatefulWidget {
