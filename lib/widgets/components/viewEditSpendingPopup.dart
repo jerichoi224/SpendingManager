@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:spending_manager/dbModels/accountEntry.dart';
+import 'package:spending_manager/dbModels/categoryEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/StringUtil.dart';
 import 'package:spending_manager/util/dbTool.dart';
@@ -45,9 +46,9 @@ Future<dynamic> viewEditSpendingPopup(
       .firstWhere((element) => element.id == item.accId)
       .caption;
 
-  String selectedTag = datastore.categoryList
-      .firstWhere((element) => element.id == item.tagId)
-      .caption;
+  CategoryEntry tag =
+      datastore.categoryList.firstWhere((element) => element.id == item.tagId);
+  String selectedTag = tag.caption;
 
   bool exclude = item.itemType == ItemType.expense.intVal
       ? item.excludeFromSpending
@@ -65,10 +66,18 @@ Future<dynamic> viewEditSpendingPopup(
   TextEditingController noteController = TextEditingController();
   noteController.text = item.caption;
 
-  List<AccountEntry> accountList = datastore.accountList.where((element) => element.show).toList();
-  AccountEntry acc = datastore.accountList.firstWhere((element) => element.id == item.accId);
-  if(!acc.show) {
+  List<AccountEntry> accountList =
+      datastore.accountList.where((element) => element.show).toList();
+  AccountEntry acc =
+      datastore.accountList.firstWhere((element) => element.id == item.accId);
+  if (!acc.show) {
     accountList.add(acc);
+  }
+
+  List<CategoryEntry> tagsList =
+      datastore.categoryList.where((element) => element.show).where((element) => element.caption != "Transfer").toList();
+  if (!tag.show) {
+    tagsList.add(tag);
   }
 
   return showDialog(
@@ -143,10 +152,7 @@ Future<dynamic> viewEditSpendingPopup(
                               const Spacer(),
                               dropdownMenu(
                                   context,
-                                  datastore.categoryList
-                                      .where((item) {
-                                        return item.caption != "Transfer";
-                                      })
+                                  tagsList
                                       .map((tag) => DropdownMenuItem<String>(
                                             value: tag.caption,
                                             child: Text(tag.caption,
@@ -190,9 +196,11 @@ Future<dynamic> viewEditSpendingPopup(
                                     controller: amountController,
                                     keyboardType: TextInputType.number,
                                     inputFormatters: [
-                                      useDecimal ?
-                                      FilteringTextInputFormatter.allow(
-                                          RegExp(r'^\d+\.?\d{0,2}')) : FilteringTextInputFormatter.digitsOnly
+                                      useDecimal
+                                          ? FilteringTextInputFormatter.allow(
+                                              RegExp(r'^\d+\.?\d{0,2}'))
+                                          : FilteringTextInputFormatter
+                                              .digitsOnly
                                     ],
                                     style: latoFont(16)),
                               ),

@@ -41,9 +41,17 @@ class _SpendState extends State<SpendWidget> {
   @override
   void initState() {
     super.initState();
-    categoryList = widget.datastore.categoryList;
+    categoryList = widget.datastore.categoryList.where((element) => element.show).toList();
     accountList = widget.datastore.accountList.where((element) => element.show).toList();
     resetAll();
+    tag = categoryList.firstWhere((element) => element.caption == "Other");
+    itemType = ItemType.expense;
+    account = accountList[0];
+    accountRec = accountList[0];
+    if (accountList.length > 1) {
+      accountRec = accountList[1];
+    }
+
     valueEditingController.addListener(() {
       FocusManager.instance.primaryFocus?.unfocus();
       setState(() {});
@@ -58,15 +66,8 @@ class _SpendState extends State<SpendWidget> {
   }
 
   void resetAll() {
-    account = accountList[0];
-    accountRec = accountList[0];
-    if (accountList.length > 1) {
-      accountRec = accountList[1];
-    }
-    tag = categoryList.firstWhere((element) => element.caption == "Other");
     valueEditingController.text = "";
     noteEditingController.text = "";
-    itemType = ItemType.expense;
   }
 
   Widget toggleButton(String caption) {
