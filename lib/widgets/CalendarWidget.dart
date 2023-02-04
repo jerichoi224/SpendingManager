@@ -47,11 +47,12 @@ class _CalendarState extends State<CalendarWidget> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
-  String locale = "ko_KR";
+  String locale = "";
 
   @override
   void initState() {
     updateState();
+    locale = widget.datastore.getPref("locale") ?? "en";
     if (widget.datastore.prefMap.keys.contains("calendar_format")) {
       _calendarFormat =
           calendarFormatMap[widget.datastore.getPref("calendar_format")]!;

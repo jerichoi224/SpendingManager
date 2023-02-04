@@ -22,7 +22,7 @@ class SpendingByCategoryWidget extends StatefulWidget {
 }
 
 class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
-  String locale = "ko_KR";
+  String locale = "en";
 
   Map<int, String> tagMap = {}; // tagid to string
   Map<int, double> spendingPerCategory = {}; // tag -> amount
@@ -43,6 +43,7 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
   @override
   void initState() {
     super.initState();
+    locale = widget.datastore.getPref("locale") ?? "en";
     if (widget.datastore.prefMap.keys.contains("show_pieChart")) {
       showPieChart = widget.datastore.getPref("show_pieChart");
     }

@@ -12,6 +12,13 @@ Future<bool> confirmPopup(BuildContext context, String title, String content,
           content: Text(content),
           actions: [
             // The "Yes" button
+            if (no.isNotEmpty)
+              TextButton(
+                  onPressed: () {
+                    ret = false;
+                    Navigator.of(ctx).pop();
+                  },
+                  child: Text(no)),
             if (yes.isNotEmpty)
               TextButton(
                 onPressed: () {
@@ -20,13 +27,6 @@ Future<bool> confirmPopup(BuildContext context, String title, String content,
                 },
                 child: Text(yes),
               ),
-            if (no.isNotEmpty)
-              TextButton(
-                  onPressed: () {
-                    ret = false;
-                    Navigator.of(ctx).pop();
-                  },
-                  child: Text(no)),
           ],
         );
       });

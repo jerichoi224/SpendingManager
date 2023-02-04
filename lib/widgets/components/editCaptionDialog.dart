@@ -38,7 +38,6 @@ TextStyle latoFont(double size) {
 
 Future<dynamic> editCaptionDialog(
     BuildContext context, String title, String originalCaption) async {
-  String locale = "ko_KR";
   TextEditingController targetController = TextEditingController();
   targetController.text = originalCaption;
   return showDialog(

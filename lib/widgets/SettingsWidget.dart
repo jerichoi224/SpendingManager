@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/widgets/settingsPages/ManageAccountPageWidget.dart';
@@ -67,6 +66,19 @@ class _SettingsState extends State<SettingsWidget> {
         ));
   }
 
+  Widget menuItem(String text, Function f) {
+    return ListTile(
+      contentPadding: const EdgeInsets.fromLTRB(25, 0, 20, 0),
+      title: Text(
+        text,
+        style: menuText,
+      ),
+      onTap: () {
+        f();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQueryData = MediaQuery.of(context);
@@ -87,33 +99,13 @@ class _SettingsState extends State<SettingsWidget> {
                           ),
                           paddedText(
                             "Settings",
-                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
                             style: menuCategory,
                           ),
-                          ListTile(
-                            dense: true,
-                            contentPadding:
-                                const EdgeInsets.fromLTRB(25, 0, 0, 0),
-                            title: Text(
-                              "Manage Accounts",
-                              style: menuText,
-                            ),
-                            onTap: () {
-                              _openManageAccPage();
-                            },
-                          ),
-                          ListTile(
-                            contentPadding:
-                                const EdgeInsets.fromLTRB(25, 0, 20, 0),
-                            title: Text(
-                              "Manage Categories",
-                              style: menuText,
-                            ),
-                            onTap: () {
-                              _openManageTagPage();
-                            },
-                          ),
+                          menuItem("Manage Accounts", _openManageAccPage),
+                          menuItem("Manage Categories", _openManageTagPage),
                           div,
+                          menuItem("Add Subscription", (){}),
                         ])))));
   }
 }

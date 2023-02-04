@@ -36,11 +36,12 @@ class _SpendState extends State<SpendWidget> {
   List<CategoryEntry> categoryList = [];
   List<AccountEntry> accountList = [];
 
-  String locale = "ko_KR";
+  String locale = "";
 
   @override
   void initState() {
     super.initState();
+    locale = widget.datastore.getPref("locale") ?? "en";
     categoryList = widget.datastore.categoryList.where((element) => element.show).toList();
     accountList = widget.datastore.accountList.where((element) => element.show).toList();
     resetAll();

@@ -6,6 +6,7 @@ import 'package:spending_manager/class/MaterialLocalizationKrDelegate.dart';
 import 'package:spending_manager/widgets/HomeWidget.dart';
 import 'package:spending_manager/widgets/InstructionWidget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 late Datastore datastore;
 
@@ -52,7 +53,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Workout Tracker',
+        title: 'Spending Manager',
         theme: ThemeData(
           brightness: Brightness.light,
         ),

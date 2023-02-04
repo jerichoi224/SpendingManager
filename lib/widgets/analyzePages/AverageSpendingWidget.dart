@@ -22,7 +22,7 @@ class AverageSpendingWidget extends StatefulWidget {
 
 class _AverageSpendingState extends State<AverageSpendingWidget> {
   DateFormat mapKey = DateFormat('MM-dd');
-  String locale = "ko_KR";
+  String locale = "";
 
   Map<int, dynamic> spendingPerDay = {}; // date -> [dailytotal, acctotal, day]
   double totalSpending = 0;
@@ -31,6 +31,7 @@ class _AverageSpendingState extends State<AverageSpendingWidget> {
   @override
   void initState() {
     super.initState();
+    locale = widget.datastore.getPref("locale") ?? "en";
     processData();
   }
 

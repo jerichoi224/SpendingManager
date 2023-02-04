@@ -25,7 +25,7 @@ class TargetSpendingWidget extends StatefulWidget {
 
 class _TargetSpendingState extends State<TargetSpendingWidget> {
   DateFormat mapKey = DateFormat('MM-dd');
-  String locale = "ko_KR";
+  String locale = "";
 
   Map<int, dynamic> spendingPerDay = {}; // date -> [dailytotal, acctotal, day]
   double totalSpending = 0;
@@ -35,6 +35,7 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
   @override
   void initState() {
     super.initState();
+    locale = widget.datastore.getPref("locale") ?? "en";
     dailyTarget = datastore.getPref("daily_target") ?? 0;
     processData();
   }

@@ -3,13 +3,13 @@ import 'package:intl/intl.dart';
 moneyFormat(String value, String locale, bool currency){
   double val = double.parse(value);
   switch(locale){
-    case "en_US": {
+    case "en": {
       if(currency) {
-        return NumberFormat("\$###,###,###,###.0#", "en_US").format(val);
+        return NumberFormat("\$###,###,###,###.0#", "en").format(val);
       }
-      return NumberFormat("###,###,###,###.##", "en_US").format(val);
+      return NumberFormat("###,###,###,###.##", "en").format(val);
     }
-    case "ko_KR": {
+    case "kr": {
       if(currency) {
         return NumberFormat('###,###,###,###,###원').format(val);
       }
@@ -23,7 +23,7 @@ moneyFormat(String value, String locale, bool currency){
 
 bool usesDecimal(String locale){
   switch(locale) {
-    case "en_US":
+    case "en":
       return true;
     default:
       return false;

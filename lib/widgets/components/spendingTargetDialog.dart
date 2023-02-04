@@ -37,7 +37,7 @@ TextStyle latoFont(double size) {
 
 Future<dynamic> spendingTargetDialog(
     BuildContext context, Datastore datastore) async {
-  String locale = "ko_KR";
+  String locale = datastore.getPref("locale") ?? "en";;
   bool useDecimal = usesDecimal(locale);
   TextEditingController targetController = TextEditingController();
   double dailyTarget = datastore.getPref("daily_target") ?? 0;
