@@ -5,6 +5,7 @@ import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/colorGenerator.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/numberFormat.dart';
+import 'package:spending_manager/widgets/components/tableCells.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class AverageSpendingWidget extends StatefulWidget {
@@ -43,11 +44,11 @@ class _AverageSpendingState extends State<AverageSpendingWidget> {
 
     widget.monthlyList.sort((a, b) => a.dateTime.compareTo(b.dateTime));
     DateTime date =
-    DateTime.fromMillisecondsSinceEpoch(widget.monthlyList[0].dateTime);
+        DateTime.fromMillisecondsSinceEpoch(widget.monthlyList[0].dateTime);
     int keyDate =
         DateTime(date.year, date.month, 1, 0, 0, 0).millisecondsSinceEpoch;
-    chartData.add(_AverageChartData(
-        DateTime.fromMillisecondsSinceEpoch(keyDate), 0, 0));
+    chartData.add(
+        _AverageChartData(DateTime.fromMillisecondsSinceEpoch(keyDate), 0, 0));
 
     for (SpendingEntry entry in widget.monthlyList) {
       if (!entry.excludeFromSpending) {
@@ -67,43 +68,27 @@ class _AverageSpendingState extends State<AverageSpendingWidget> {
     for (int i in spendingPerDay.keys.toList()) {
       List<dynamic> val = spendingPerDay[i];
       DateTime date = DateTime.fromMillisecondsSinceEpoch(i);
-      chartData.add(_AverageChartData(
-          date, val[0] * -1, (val[1] * - 1)/date.day));
+      chartData
+          .add(_AverageChartData(date, val[0] * -1, (val[1] * -1) / date.day));
     }
   }
 
-  List<Widget> dailySpendingList() {
+  List<TableRow> dailySpendingList() {
     if (chartData.isEmpty) {
       return [];
     }
 
-    List<Widget> returnList = [];
+    List<TableRow> returnList = [];
 
     for (_AverageChartData data in chartData) {
       if (data.date.hour != 0) {
-        returnList.add(Container(
-          margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
-          height: 40,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(mapKey.format(data.date),
-                  style: GoogleFonts.lato(
-                      textStyle: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w400))),
-              const Spacer(),
-              Text(moneyFormat(data.daily.toString(), locale, true),
-                  style: GoogleFonts.lato(
-                      textStyle: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w400))),
-              const Spacer(),
-              Text(moneyFormat(data.avg.toString(), locale, true),
-                  style: GoogleFonts.lato(
-                      textStyle: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w400))),
-            ],
-          ),
-        ));
+        returnList.add(TableRow(children: [
+          cellContentText(mapKey.format(data.date), Alignment.centerLeft),
+          cellContentText(moneyFormat(data.daily.toString(), locale, true),
+              Alignment.centerRight),
+          cellContentText(moneyFormat(data.avg.toString(), locale, true),
+              Alignment.centerRight),
+        ]));
       }
     }
 
@@ -150,70 +135,75 @@ class _AverageSpendingState extends State<AverageSpendingWidget> {
             body: chartData.isEmpty
                 ? Container(child: Center(child: Text("No Data Found")))
                 : Column(
-              children: [
-                SizedBox(
-                  height: 50,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                        child: Text("Daily & Average Spending",
-                            style: GoogleFonts.lato(
-                                textStyle: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w600))),
-                      ),
-                      const Spacer(),
-
-                    ],
-                  ),
-                ),
-                lineChart(),
-                const SizedBox(
-                  height: 5,
-                ),
-                Container(
-                  margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
-                  height: 40,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text("Date",
-                          style: GoogleFonts.lato(
-                              textStyle: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700))),
-                      const Spacer(),
-                      Text("Daily Spent",
-                          style: GoogleFonts.lato(
-                              textStyle: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700))),
-                      const Spacer(),
-                      Text("Daily Average",
-                          style: GoogleFonts.lato(
-                              textStyle: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700)))
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: MediaQuery.removePadding(
-                        removeTop: true,
-                        context: context,
-                        child: ListView(
-                          primary: false,
-                          shrinkWrap: true,
-                          children: dailySpendingList(),
+                      SizedBox(
+                        height: 50,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                              child: Text("Daily & Average Spending",
+                                  style: GoogleFonts.lato(
+                                      textStyle: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w600))),
+                            ),
+                            const Spacer(),
+                          ],
                         ),
-                      )),
-                ),
-              ],
-            )));
+                      ),
+                      lineChart(),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                        height: 40,
+                        child: Table(
+                          columnWidths: const {
+                            0: FlexColumnWidth(2),
+                            1: FlexColumnWidth(4),
+                            2: FlexColumnWidth(4),
+                          },
+                          border: TableBorder.symmetric(
+                            outside: BorderSide.none,
+                          ),
+                          children: [
+                            TableRow(children: [
+                              cellTitleText("Date", Alignment.centerLeft),
+                              cellTitleText(
+                                  "Daily Spent", Alignment.centerRight),
+                              cellTitleText(
+                                  "Daily Average", Alignment.centerRight),
+                            ]),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            child: MediaQuery.removePadding(
+                                removeTop: true,
+                                context: context,
+                                child: Container(
+                                  margin:
+                                      const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                                  child: Table(
+                                    columnWidths: const {
+                                      0: FlexColumnWidth(2),
+                                      1: FlexColumnWidth(4),
+                                      2: FlexColumnWidth(4),
+                                    },
+                                    border: TableBorder.symmetric(
+                                      outside: BorderSide.none,
+                                    ),
+                                    children: dailySpendingList(),
+                                  ),
+                                ))),
+                      ),
+                    ],
+                  )));
   }
 }
 

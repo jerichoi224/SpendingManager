@@ -104,7 +104,7 @@ class _ManageTagsPageState extends State<ManageTagsPageWidget> {
           }
           confirmPopup(
                   context,
-                  "Delete Account?",
+                  "Delete Category?",
                   "Previous records in this category will remain, but you will no longer be able to add entries using this category.",
                   "Yes",
                   "No")

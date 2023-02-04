@@ -8,6 +8,7 @@ import 'package:spending_manager/util/colorGenerator.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/numberFormat.dart';
 import 'package:spending_manager/widgets/components/spendingTargetDialog.dart';
+import 'package:spending_manager/widgets/components/tableCells.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class TargetSpendingWidget extends StatefulWidget {
@@ -77,38 +78,22 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
     }
   }
 
-  List<Widget> dailySpendingList() {
+  List<TableRow> dailySpendingList() {
     if (chartData.isEmpty) {
       return [];
     }
 
-    List<Widget> returnList = [];
+    List<TableRow> returnList = [];
 
     for (_TargetChartData data in chartData) {
       if (data.date.hour != 0) {
-        returnList.add(Container(
-          margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
-          height: 40,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(mapKey.format(data.date),
-                  style: GoogleFonts.lato(
-                      textStyle: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w400))),
-              const Spacer(),
-              Text(moneyFormat(data.daily.toString(), locale, true),
-                  style: GoogleFonts.lato(
-                      textStyle: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w400))),
-              const Spacer(),
-              Text(moneyFormat(data.accum.toString(), locale, true),
-                  style: GoogleFonts.lato(
-                      textStyle: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w400))),
-            ],
-          ),
-        ));
+        returnList.add(TableRow(children: [
+          cellContentText(mapKey.format(data.date), Alignment.centerLeft),
+          cellContentText(moneyFormat(data.daily.toString(), locale, true),
+              Alignment.centerRight),
+          cellContentText(moneyFormat(data.accum.toString(), locale, true),
+              Alignment.centerRight),
+        ]));
       }
     }
 
@@ -193,28 +178,24 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
                         height: 5,
                       ),
                       Container(
-                        margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
-                        height: 40,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                        margin: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                        child: Table(
+                          columnWidths: const {
+                            0: FlexColumnWidth(2),
+                            1: FlexColumnWidth(4),
+                            2: FlexColumnWidth(4),
+                          },
+                          border: TableBorder.symmetric(
+                            outside: BorderSide.none,
+                          ),
                           children: [
-                            Text("Date",
-                                style: GoogleFonts.lato(
-                                    textStyle: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700))),
-                            const Spacer(),
-                            Text("Daily Spent",
-                                style: GoogleFonts.lato(
-                                    textStyle: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700))),
-                            const Spacer(),
-                            Text("Accumulative",
-                                style: GoogleFonts.lato(
-                                    textStyle: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700)))
+                            TableRow(children: [
+                              cellTitleText("Date", Alignment.centerLeft),
+                              cellTitleText(
+                                  "Daily Spent", Alignment.centerRight),
+                              cellTitleText(
+                                  "Accumulative", Alignment.centerRight),
+                            ]),
                           ],
                         ),
                       ),
@@ -222,14 +203,23 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
                         child: SingleChildScrollView(
                             scrollDirection: Axis.vertical,
                             child: MediaQuery.removePadding(
-                              removeTop: true,
-                              context: context,
-                              child: ListView(
-                                primary: false,
-                                shrinkWrap: true,
-                                children: dailySpendingList(),
-                              ),
-                            )),
+                                removeTop: true,
+                                context: context,
+                                child: Container(
+                                  margin:
+                                      const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                                  child: Table(
+                                    columnWidths: const {
+                                      0: FlexColumnWidth(2),
+                                      1: FlexColumnWidth(4),
+                                      2: FlexColumnWidth(4),
+                                    },
+                                    border: TableBorder.symmetric(
+                                      outside: BorderSide.none,
+                                    ),
+                                    children: dailySpendingList(),
+                                  ),
+                                ))),
                       ),
                     ],
                   )));
