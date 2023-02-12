@@ -104,8 +104,9 @@ class _SettingsState extends State<SettingsWidget> {
                           ),
                           menuItem("Manage Accounts", _openManageAccPage),
                           menuItem("Manage Categories", _openManageTagPage),
+                          menuItem("Manage Subscriptions", (){}),
                           div,
-                          menuItem("Add Subscription", (){}),
+                          menuItem("About", (){}),
                         ])))));
   }
 }

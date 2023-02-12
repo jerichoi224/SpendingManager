@@ -23,6 +23,7 @@ class AverageSpendingWidget extends StatefulWidget {
 class _AverageSpendingState extends State<AverageSpendingWidget> {
   DateFormat mapKey = DateFormat('MM-dd');
   String locale = "";
+  String currency = "";
 
   Map<int, dynamic> spendingPerDay = {}; // date -> [dailytotal, acctotal, day]
   double totalSpending = 0;
@@ -32,6 +33,8 @@ class _AverageSpendingState extends State<AverageSpendingWidget> {
   void initState() {
     super.initState();
     locale = widget.datastore.getPref("locale") ?? "en";
+    currency = widget.datastore.getPref("currency") ?? "KRW";
+
     processData();
   }
 
@@ -46,15 +49,16 @@ class _AverageSpendingState extends State<AverageSpendingWidget> {
     widget.monthlyList.sort((a, b) => a.dateTime.compareTo(b.dateTime));
     DateTime date =
         DateTime.fromMillisecondsSinceEpoch(widget.monthlyList[0].dateTime);
-    int keyDate =
-        DateTime(date.year, date.month, 1, 0, 0, 0).millisecondsSinceEpoch;
-    chartData.add(
-        _AverageChartData(DateTime.fromMillisecondsSinceEpoch(keyDate), 0, 0));
+
+    bool hasFirstDay = false;
 
     for (SpendingEntry entry in widget.monthlyList) {
       if (!entry.excludeFromSpending) {
         date = DateTime.fromMillisecondsSinceEpoch(entry.dateTime);
-        keyDate = DateTime(date.year, date.month, date.day, 23, 59)
+        if (date.day == 1) {
+          hasFirstDay = true;
+        }
+        int keyDate = DateTime(date.year, date.month, date.day, 0, 0, 1)
             .millisecondsSinceEpoch;
         totalSpending += entry.value;
         List<dynamic> val = spendingPerDay[keyDate] ?? [0, 0, date.day];
@@ -64,6 +68,13 @@ class _AverageSpendingState extends State<AverageSpendingWidget> {
           date.day
         ];
       }
+    }
+
+    if(!hasFirstDay){
+      int firstDate =
+          DateTime(date.year, date.month, 1, 0, 0, 0).millisecondsSinceEpoch;
+      chartData.add(
+          _AverageChartData(DateTime.fromMillisecondsSinceEpoch(firstDate), 0, 0));
     }
 
     for (int i in spendingPerDay.keys.toList()) {
@@ -82,12 +93,12 @@ class _AverageSpendingState extends State<AverageSpendingWidget> {
     List<TableRow> returnList = [];
 
     for (_AverageChartData data in chartData) {
-      if (data.date.hour != 0) {
+      if (data.date.second != 0) {
         returnList.add(TableRow(children: [
           cellContentText(mapKey.format(data.date), Alignment.centerLeft),
-          cellContentText(moneyFormat(data.daily.toString(), locale, true),
+          cellContentText(moneyFormat(data.daily.toString(), currency, true),
               Alignment.centerRight),
-          cellContentText(moneyFormat(data.avg.toString(), locale, true),
+          cellContentText(moneyFormat(data.avg.toString(), currency, true),
               Alignment.centerRight),
         ]));
       }

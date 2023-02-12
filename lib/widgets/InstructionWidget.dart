@@ -44,6 +44,11 @@ class _InstructionState extends State<InstructionWidget> {
     setState(() {});
   }
 
+  void setCurrency(String currency) {
+    widget.datastore.setPref("currency", currency);
+    setState(() {});
+  }
+
   finishSplash() async {
     nextPage();
     widget.datastore.accountList = widget.datastore.accountBox.getAll();
@@ -191,6 +196,7 @@ class _InstructionState extends State<InstructionWidget> {
                         children: <Widget>[
                           ListTile(
                               onTap: () {
+                                setLanguage(locale);
                                 nextPage();
                               },
                               title: Text(
@@ -371,6 +377,7 @@ class _InstructionState extends State<InstructionWidget> {
                                     "Back")
                                 .then((value) {
                               if (value) {
+                                setCurrency(currency);
                                 nextPage();
                               }
                             });

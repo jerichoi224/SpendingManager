@@ -37,11 +37,13 @@ class _SpendState extends State<SpendWidget> {
   List<AccountEntry> accountList = [];
 
   String locale = "";
-
+  String currency = "";
   @override
   void initState() {
     super.initState();
     locale = widget.datastore.getPref("locale") ?? "en";
+    currency = widget.datastore.getPref("currency") ?? "KRW";
+
     categoryList = widget.datastore.categoryList.where((element) => element.show).toList();
     accountList = widget.datastore.accountList.where((element) => element.show).toList();
     resetAll();
@@ -208,7 +210,7 @@ class _SpendState extends State<SpendWidget> {
                                 valueEditingController.text.isEmpty
                                     ? "0"
                                     : moneyFormat(valueEditingController.text,
-                                        locale, true),
+                                    currency, true),
                                 style: const TextStyle(fontSize: 46),
                               ),
                               const Spacer(),

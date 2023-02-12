@@ -23,6 +23,7 @@ class SpendingByCategoryWidget extends StatefulWidget {
 
 class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
   String locale = "en";
+  String currency = "";
 
   Map<int, String> tagMap = {}; // tagid to string
   Map<int, double> spendingPerCategory = {}; // tag -> amount
@@ -44,6 +45,8 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
   void initState() {
     super.initState();
     locale = widget.datastore.getPref("locale") ?? "en";
+    currency = widget.datastore.getPref("currency") ?? "KRW";
+
     if (widget.datastore.prefMap.keys.contains("show_pieChart")) {
       showPieChart = widget.datastore.getPref("show_pieChart");
     }
@@ -147,7 +150,7 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
                       textStyle: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w400))),
               const Spacer(),
-              Text(moneyFormat(spendingPerAccount[i]!.toString(), locale, true),
+              Text(moneyFormat(spendingPerAccount[i]!.toString(), currency, true),
                   style: GoogleFonts.lato(
                       textStyle: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w400)))
@@ -181,7 +184,7 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
             Spacer(),
             Text(
                 moneyFormat(
-                    (spendingPerCategory[i]! * -1).toString(), locale, true),
+                    (spendingPerCategory[i]! * -1).toString(), currency, true),
                 style: GoogleFonts.lato(
                     textStyle: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.w400)))

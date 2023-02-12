@@ -38,6 +38,8 @@ TextStyle latoFont(double size) {
 Future<dynamic> viewEditSpendingPopup(
     BuildContext context, Datastore datastore, int spendingId) async {
   String locale = datastore.getPref("locale") ?? "en";
+  String currency = datastore.getPref("currency") ?? "KRW";
+
   bool useDecimal = usesDecimal(locale);
 
   SpendingEntry item =

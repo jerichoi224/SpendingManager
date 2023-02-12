@@ -48,11 +48,14 @@ class _CalendarState extends State<CalendarWidget> {
   DateTime? _selectedDay;
 
   String locale = "";
+  String currency = "";
 
   @override
   void initState() {
     updateState();
     locale = widget.datastore.getPref("locale") ?? "en";
+    currency = widget.datastore.getPref("currency") ?? "KRW";
+
     if (widget.datastore.prefMap.keys.contains("calendar_format")) {
       _calendarFormat =
           calendarFormatMap[widget.datastore.getPref("calendar_format")]!;
@@ -91,7 +94,7 @@ class _CalendarState extends State<CalendarWidget> {
     }
 
     return Text(
-      moneyFormat(text, locale, true),
+      moneyFormat(text, currency, true),
       style: GoogleFonts.lato(
           textStyle: TextStyle(
               fontSize: 16,
@@ -168,7 +171,7 @@ class _CalendarState extends State<CalendarWidget> {
               const Spacer(),
               dayExpense != 0
                   ? Text(
-                      moneyFormat(dayExpense.toString(), locale, true),
+                      moneyFormat(dayExpense.toString(), currency, true),
                       style: GoogleFonts.lato(
                           textStyle: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w600)),
