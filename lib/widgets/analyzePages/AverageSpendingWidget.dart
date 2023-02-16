@@ -51,13 +51,15 @@ class _AverageSpendingState extends State<AverageSpendingWidget> {
         DateTime.fromMillisecondsSinceEpoch(widget.monthlyList[0].dateTime);
 
     bool hasFirstDay = false;
+    bool hasToday = false;
 
     for (SpendingEntry entry in widget.monthlyList) {
       if (!entry.excludeFromSpending) {
         date = DateTime.fromMillisecondsSinceEpoch(entry.dateTime);
-        if (date.day == 1) {
-          hasFirstDay = true;
-        }
+
+        hasFirstDay |= date.day == 1;
+        hasToday |= date.day == DateTime.now().day;
+
         int keyDate = DateTime(date.year, date.month, date.day, 0, 0, 1)
             .millisecondsSinceEpoch;
         totalSpending += entry.value;
@@ -82,6 +84,15 @@ class _AverageSpendingState extends State<AverageSpendingWidget> {
       DateTime date = DateTime.fromMillisecondsSinceEpoch(i);
       chartData
           .add(_AverageChartData(date, val[0] * -1, (val[1] * -1) / date.day));
+    }
+
+    if (!hasToday) {
+      DateTime today = DateTime.now();
+      _AverageChartData last = chartData[chartData.length-1];
+      chartData.add(_AverageChartData(
+          DateTime(today.year, today.month, today.day, 0, 0, 0),
+          0,
+          (last.avg * last.date.day)/ today.day));
     }
   }
 

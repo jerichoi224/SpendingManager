@@ -54,13 +54,14 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
     DateTime date =
         DateTime.fromMillisecondsSinceEpoch(widget.monthlyList[0].dateTime);
     bool hasFirstDay = false;
+    bool hasToday = false;
 
     for (SpendingEntry entry in widget.monthlyList) {
       if (!entry.excludeFromSpending) {
         date = DateTime.fromMillisecondsSinceEpoch(entry.dateTime);
-        if (date.day == 1) {
-          hasFirstDay = true;
-        }
+        hasFirstDay |= date.day == 1;
+        hasToday |= date.day == DateTime.now().day;
+
         int keyDate = DateTime(date.year, date.month, date.day, 0, 0, 1)
             .millisecondsSinceEpoch;
         totalSpending += entry.value;
@@ -74,10 +75,8 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
     }
 
     if (!hasFirstDay) {
-      int firstDate =
-          DateTime(date.year, date.month, 1, 0, 0, 0).millisecondsSinceEpoch;
       chartData.add(_TargetChartData(
-          DateTime.fromMillisecondsSinceEpoch(firstDate), 0, 0, dailyTarget));
+          DateTime(date.year, date.month, 1, 0, 0, 0), 0, 0, dailyTarget));
     }
 
     for (int i in spendingPerDay.keys.toList()) {
@@ -85,6 +84,15 @@ class _TargetSpendingState extends State<TargetSpendingWidget> {
       DateTime date = DateTime.fromMillisecondsSinceEpoch(i);
       chartData.add(_TargetChartData(
           date, val[0] * -1, val[1] * -1, date.day * dailyTarget));
+    }
+
+    if (!hasToday) {
+      DateTime today = DateTime.now();
+      chartData.add(_TargetChartData(
+          DateTime(today.year, today.month, today.day, 0, 0, 0),
+          0,
+          chartData[chartData.length - 1].accum,
+          today.day * dailyTarget));
     }
   }
 
