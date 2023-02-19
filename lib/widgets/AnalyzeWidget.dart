@@ -6,6 +6,8 @@ import 'package:spending_manager/widgets/AnalyzePages/SpendingByCategoryWidget.d
 import 'package:spending_manager/widgets/AnalyzePages/AverageSpendingWidget.dart';
 import 'package:spending_manager/widgets/AnalyzePages/TargetSpendingWidget.dart';
 import 'package:floating_bottom_navigation_bar/floating_bottom_navigation_bar.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+import 'package:spending_manager/widgets/analyzePages/AccountAmountWidget.dart';
 
 class AnalyzeWidget extends StatefulWidget {
   late Datastore datastore;
@@ -67,16 +69,17 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                       processNow();
                       setState(() {});
                     },
-                    icon: Icon(CarbonIcons.chevron_left)),
+                    icon: const Icon(CarbonIcons.chevron_left)),
                 Column(
                   children: [
                     Text(
                       datetime.month.toString(),
-                      style: TextStyle(fontSize: 22),
+                      style: const TextStyle(fontSize: 22),
                     ),
                     Text(
                       datetime.year.toString(),
-                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                      style:
+                          const TextStyle(fontSize: 12, color: Colors.black54),
                     ),
                   ],
                 ),
@@ -87,7 +90,7 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                       processNow();
                       setState(() {});
                     },
-                    icon: Icon(CarbonIcons.chevron_right))
+                    icon: const Icon(CarbonIcons.chevron_right))
               ],
             )
           ],
@@ -100,7 +103,7 @@ class _AnalyzeState extends State<AnalyzeWidget> {
     return GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-          resizeToAvoidBottomInset:false,
+          resizeToAvoidBottomInset: false,
           backgroundColor: Colors.white,
           body: SizedBox(
               width: mediaQueryData.size.width,
@@ -121,6 +124,10 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                       },
                       controller: pageController,
                       children: [
+                        AccountAmountWidget(
+                            key: UniqueKey(),
+                            datastore: widget.datastore,
+                            monthlyList: monthlyList),
                         SpendingByCategoryWidget(
                             key: UniqueKey(),
                             datastore: widget.datastore,
@@ -155,11 +162,14 @@ class _AnalyzeState extends State<AnalyzeWidget> {
                   currentIndex: _currentIndex,
                   items: [
                     FloatingNavbarItem(
-                        icon: CarbonIcons.tag, title: 'Category'),
+                        icon: FluentIcons.album_24_regular, title: 'Accounts'),
+                    FloatingNavbarItem(
+                        icon: FluentIcons.tag_24_regular, title: 'Category'),
                     FloatingNavbarItem(
                         icon: CarbonIcons.chart_line, title: 'Target'),
                     FloatingNavbarItem(
                         icon: CarbonIcons.account, title: 'Average'),
+
 //              FloatingNavbarItem(icon: CarbonIcons.chart_combo, title: 'Average'),
                   ],
                 ),

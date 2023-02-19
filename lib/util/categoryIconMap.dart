@@ -1,7 +1,5 @@
-import 'package:carbon_icons/carbon_icons.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 Map<int, IconData> categoryIconMap = {
   1: FluentIcons.building_bank_24_regular,
