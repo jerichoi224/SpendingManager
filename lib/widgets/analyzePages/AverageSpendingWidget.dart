@@ -106,11 +106,11 @@ class _AverageSpendingState extends State<AverageSpendingWidget> {
     for (_AverageChartData data in chartData) {
       if (data.date.second != 0) {
         returnList.add(TableRow(children: [
-          cellContentText(mapKey.format(data.date), Alignment.centerLeft),
+          cellContentText(mapKey.format(data.date), Alignment.centerLeft, 40),
           cellContentText(moneyFormat(data.daily.toString(), currency, true),
-              Alignment.centerRight),
+              Alignment.centerRight, 40),
           cellContentText(moneyFormat(data.avg.toString(), currency, true),
-              Alignment.centerRight),
+              Alignment.centerRight, 40),
         ]));
       }
     }

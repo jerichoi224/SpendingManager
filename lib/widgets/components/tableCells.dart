@@ -11,9 +11,9 @@ Widget cellTitleText(String text, Alignment alignment) {
                   fontSize: 16, fontWeight: FontWeight.w700))));
 }
 
-Widget cellContentText(String text, Alignment alignment) {
+Widget cellContentText(String text, Alignment alignment, double height) {
   return Container(
-      height: 40,
+      height: height,
       alignment: alignment,
       child: Text(text,
           style: GoogleFonts.lato(

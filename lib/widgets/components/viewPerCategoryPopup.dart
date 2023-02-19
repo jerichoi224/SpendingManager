@@ -37,10 +37,10 @@ Widget moneyText(SpendingEntry item, bool receiveAcc, String currency) {
   );
 }
 
-Future<dynamic> viewAccountSpendingPopup(BuildContext context,
+Future<dynamic> viewPerCategoryPopup(BuildContext context,
     Datastore datastore,
     List<SpendingEntry> entryList,
-    String accountName) async {
+    String tagName) async {
   String locale = datastore.getPref("locale") ?? "en";
   String currency = datastore.getPref("currency") ?? "KRW";
 
@@ -48,10 +48,10 @@ Future<dynamic> viewAccountSpendingPopup(BuildContext context,
 
   List<Widget> accountSpending = [];
 
-  double minHeight = 35;
   double dayExpense = 0;
   double dayIncome = 0;
   int dailyCount = 0;
+  double minHeight = 35;
   List<SpendingEntry> tmpList = [];
 
   entryList.sort((a, b) => a.dateTime.compareTo(b.dateTime));
@@ -171,7 +171,7 @@ Future<dynamic> viewAccountSpendingPopup(BuildContext context,
               child: AlertDialog(
                   scrollable: true,
                   content: Container(
-                    height: min(minHeight, 400),
+                    height: min(400, minHeight),
                     margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                     width: MediaQuery
                         .of(context)
@@ -183,7 +183,7 @@ Future<dynamic> viewAccountSpendingPopup(BuildContext context,
                           Container(
                               margin:EdgeInsets.fromLTRB(0, 0, 0, 10),
                               alignment: Alignment.centerLeft,
-                              child: Text(accountName,
+                              child: Text(tagName,
                                   style: GoogleFonts.lato(
                                       textStyle: const TextStyle(
                                           fontSize: 18,

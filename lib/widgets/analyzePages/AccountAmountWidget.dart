@@ -5,6 +5,7 @@ import 'package:spending_manager/util/colorGenerator.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/enum.dart';
 import 'package:spending_manager/util/numberFormat.dart';
+import 'package:spending_manager/widgets/components/tableCells.dart';
 import 'package:spending_manager/widgets/components/viewAccountSpendingPopup.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -54,27 +55,30 @@ class _AccountAmountState extends State<AccountAmountWidget> {
 
   Widget amountText(num spent, num income) {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(50, 0, 20, 5),
-        child: Row(
+      padding: const EdgeInsets.fromLTRB(50, 0, 20, 5),
+      child: Table(
+          columnWidths: const {
+            0: FlexColumnWidth(1),
+            1: FlexColumnWidth(1),
+            2: FlexColumnWidth(1),
+          },
+          border: TableBorder.symmetric(
+            outside: BorderSide.none,
+          ),
           children: [
-            Container(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                    "+${moneyFormat(income.toString(), currency, true)}",
-                    style: amountTextStyle())),
-            const Spacer(),
-            Container(
-                alignment: Alignment.center,
-                child: Text("${moneyFormat(spent.toString(), currency, true)}",
-                    style: amountTextStyle())),
-            const Spacer(),
-            Container(
-                alignment: Alignment.centerRight,
-                child: Text(
-                    "${moneyFormat((income + spent).toString(), currency, true)}",
-                    style: amountTextStyle()))
-          ],
-        ));
+            TableRow(children: [
+              cellContentText(
+                  "+${moneyFormat(income.toString(), currency, true)}",
+                  Alignment.centerRight, 25),
+              cellContentText(
+                  "${moneyFormat(spent.toString(), currency, true)}",
+                  Alignment.centerRight, 25),
+              cellContentText(
+                  "${moneyFormat((income + spent).toString(), currency, true)}",
+                  Alignment.centerRight, 25),
+            ])
+          ]),
+    );
   }
 
   void processData() {
@@ -87,16 +91,16 @@ class _AccountAmountState extends State<AccountAmountWidget> {
 
     for (SpendingEntry entry in widget.monthlyList) {
       if (entry.itemType == ItemType.expense.intVal) {
-        List<dynamic> val = spendingPerAccount[entry.accId] ?? [entry.value, 0];
-        spendingPerAccount[entry.accId] = [val[0] += entry.value, val[1]];
+        List<dynamic> val = spendingPerAccount[entry.accId] ?? [0, 0];
+        spendingPerAccount[entry.accId] = [val[0] + entry.value, val[1]];
       } else if (entry.itemType == ItemType.income.intVal) {
-        List<dynamic> val = spendingPerAccount[entry.accId] ?? [0, entry.value];
-        spendingPerAccount[entry.accId] = [val[0], val[1] += entry.value];
+        List<dynamic> val = spendingPerAccount[entry.accId] ?? [0, 0];
+        spendingPerAccount[entry.accId] = [val[0], val[1] + entry.value];
       } else {
-        List<dynamic> val = spendingPerAccount[entry.accId] ?? [entry.value, 0];
-        spendingPerAccount[entry.accId] = [val[0] += entry.value, val[1]];
-        val = spendingPerAccount[entry.recAccId] ?? [0, entry.value];
-        spendingPerAccount[entry.recAccId] = [val[0], val[1] += entry.value];
+        List<dynamic> val = spendingPerAccount[entry.accId] ?? [0, 0];
+        spendingPerAccount[entry.accId] = [val[0] + entry.value, val[1]];
+        val = spendingPerAccount[entry.recAccId] ?? [0, 0];
+        spendingPerAccount[entry.recAccId] = [val[0], val[1] + entry.value];
       }
     }
 

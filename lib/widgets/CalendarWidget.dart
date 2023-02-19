@@ -189,7 +189,7 @@ class _CalendarState extends State<CalendarWidget> {
           color: Colors.black54,
         ));
 
-        for (SpendingEntry item in tmpList) {
+        for (SpendingEntry item in List.from(tmpList.reversed)) {
           if (item.itemType == ItemType.transfer.intVal) // Receive Entry
           {
             historyList.add(Container(
