@@ -71,6 +71,7 @@ class _SpendState extends State<SpendWidget> {
   void resetAll() {
     valueEditingController.text = "";
     noteEditingController.text = "";
+    date = DateTime.now();
   }
 
   Widget toggleButton(String caption) {

@@ -36,5 +36,9 @@
   "instruction_creating_db": "Creating Database.\nPlease Wait.",
   "instruction_initial_setting": "Please Select your initial setting",
   "instruction_default_weight": "Weight Metric",
-  "instruction_default_distance": "Distance Metric"
+  "instruction_default_distance": "Distance Metric",
+
+  "settings_about": "About",
+  "settings_developer_info": "The Developer",
+  "settings_send_me_bugs": "Email me if you find any bugs in the app (hopefully you don't)"
 }

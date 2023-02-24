@@ -53,6 +53,11 @@ class _AccountAmountState extends State<AccountAmountWidget> {
         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400));
   }
 
+  Widget div = const Divider(
+    height: 1,
+    color: Colors.grey,
+  );
+
   Widget amountText(num spent, num income) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(50, 0, 20, 5),
@@ -69,13 +74,16 @@ class _AccountAmountState extends State<AccountAmountWidget> {
             TableRow(children: [
               cellContentText(
                   "+${moneyFormat(income.toString(), currency, true)}",
-                  Alignment.centerRight, 25),
+                  Alignment.centerRight,
+                  25),
               cellContentText(
                   "${moneyFormat(spent.toString(), currency, true)}",
-                  Alignment.centerRight, 25),
+                  Alignment.centerRight,
+                  25),
               cellContentText(
                   "${moneyFormat((income + spent).toString(), currency, true)}",
-                  Alignment.centerRight, 25),
+                  Alignment.centerRight,
+                  25),
             ])
           ]),
     );
@@ -116,8 +124,9 @@ class _AccountAmountState extends State<AccountAmountWidget> {
     }
 
     List<Widget> returnList = [];
-
+    double total_balance = 0;
     for (_AveragAccountData data in chartData) {
+      total_balance += (data.spent + data.income);
       returnList.add(InkWell(
         onTap: () {
           viewAccountSpendingPopup(
@@ -134,16 +143,32 @@ class _AccountAmountState extends State<AccountAmountWidget> {
           width: double.infinity,
           child: Column(
             children: [
+              div,
               accountText(widget.datastore.accountList
                   .firstWhere((element) => element.id == data.accId)
                   .caption),
-              amountText(data.spent, data.income)
+              amountText(data.spent, data.income),
             ],
           ),
         ),
       ));
     }
-
+    returnList.insert(
+        0,
+        SizedBox(
+          width: double.infinity,
+          child: Row(children: [
+            accountText("Total Balance"),
+            const Spacer(),
+            Container(
+                padding: const EdgeInsets.fromLTRB(50, 0, 20, 5),
+                child: Text(
+                    "${moneyFormat((total_balance).toString(), currency, true)}",
+                    style: GoogleFonts.lato(
+                        textStyle: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w400))))
+          ]),
+        ));
     return returnList;
   }
 

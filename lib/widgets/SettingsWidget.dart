@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:spending_manager/util/dbTool.dart';
+import 'package:spending_manager/widgets/settingsPages/AboutSettingPageWidget.dart';
 import 'package:spending_manager/widgets/settingsPages/ManageAccountPageWidget.dart';
 import 'package:spending_manager/widgets/settingsPages/ManageTagsPageWidget.dart';
 
@@ -79,6 +80,14 @@ class _SettingsState extends State<SettingsWidget> {
     );
   }
 
+  void openAboutPage(BuildContext context) async {
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AboutSettingPageWidget(),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQueryData = MediaQuery.of(context);
@@ -104,9 +113,11 @@ class _SettingsState extends State<SettingsWidget> {
                           ),
                           menuItem("Manage Accounts", _openManageAccPage),
                           menuItem("Manage Categories", _openManageTagPage),
-                          menuItem("Manage Subscriptions", (){}),
+                          menuItem("Manage Subscriptions", () {}),
                           div,
-                          menuItem("About", (){}),
+                          menuItem("About", () {
+                            openAboutPage(context);
+                          }),
                         ])))));
   }
 }
