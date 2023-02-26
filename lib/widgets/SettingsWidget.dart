@@ -4,6 +4,7 @@ import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/widgets/settingsPages/AboutSettingPageWidget.dart';
 import 'package:spending_manager/widgets/settingsPages/ManageAccountPageWidget.dart';
 import 'package:spending_manager/widgets/settingsPages/ManageTagsPageWidget.dart';
+import 'package:spending_manager/widgets/subscriptionPages/SubscriptionWidget.dart';
 
 class SettingsWidget extends StatefulWidget {
   late Datastore datastore;
@@ -67,6 +68,16 @@ class _SettingsState extends State<SettingsWidget> {
         ));
   }
 
+  void _openSubscriptionPage() async {
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SubscriptionWidget(
+            datastore: widget.datastore,
+          ),
+        ));
+  }
+
   Widget menuItem(String text, Function f) {
     return ListTile(
       contentPadding: const EdgeInsets.fromLTRB(25, 0, 20, 0),
@@ -113,7 +124,7 @@ class _SettingsState extends State<SettingsWidget> {
                           ),
                           menuItem("Manage Accounts", _openManageAccPage),
                           menuItem("Manage Categories", _openManageTagPage),
-                          menuItem("Manage Subscriptions", () {}),
+                          menuItem("Manage Subscriptions", _openSubscriptionPage),
                           div,
                           menuItem("About", () {
                             openAboutPage(context);

@@ -7,6 +7,7 @@ import 'package:spending_manager/dbModels/spending_entry_model.dart';
 import 'package:spending_manager/util/colorGenerator.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/util/numberFormat.dart';
+import 'package:spending_manager/widgets/components/viewPerAccountPopup.dart';
 import 'package:spending_manager/widgets/components/viewPerCategoryPopup.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -30,7 +31,7 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
   Map<int, double> spendingPerCategory = {}; // tag -> amount
   Map<int, double> spendingPerAccount = {}; // account -> amount
   Map<int, Map<int, double>> spendingByTagAccount =
-  {}; // tag -> account -> spending
+      {}; // tag -> account -> spending
   Map<int, bool> accountUsed = {};
   Map<int, bool> categoryUsed = {};
   List<_ColumnChartData> columnChartData = [];
@@ -137,29 +138,39 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
 
     for (int i in spendingPerAccount.keys) {
       if (accountUsed[i] ?? false) {
-        returnList.add(Container(
-          margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
-          height: 40,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                  widget.datastore.accountList
-                      .firstWhere((element) => element.id == i)
-                      .caption,
-                  style: GoogleFonts.lato(
-                      textStyle: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w400))),
-              const Spacer(),
-              Text(
-                  moneyFormat(
-                      spendingPerAccount[i]!.toString(), currency, true),
-                  style: GoogleFonts.lato(
-                      textStyle: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w400)))
-            ],
-          ),
-        ));
+        returnList.add(InkWell(
+            onTap: () {
+              viewPerAccountPopup(
+                  context,
+                  widget.datastore,
+                  widget.monthlyList
+                      .where((element) => element.accId == i ||  element.recAccId == i )
+                      .toList(),
+                  i);
+            },
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
+              height: 40,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                      widget.datastore.accountList
+                          .firstWhere((element) => element.id == i)
+                          .caption,
+                      style: GoogleFonts.lato(
+                          textStyle: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w400))),
+                  const Spacer(),
+                  Text(
+                      moneyFormat(
+                          spendingPerAccount[i]!.toString(), currency, true),
+                      style: GoogleFonts.lato(
+                          textStyle: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w400)))
+                ],
+              ),
+            )));
       }
     }
     return returnList;
@@ -175,9 +186,13 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
     for (int i in sortedKeys) {
       returnList.add(InkWell(
           onTap: () {
-            viewPerCategoryPopup(context, widget.datastore,
-                widget.monthlyList.where((element) => element.tagId == i)
-                    .toList(), tagMap[i]!);
+            viewPerCategoryPopup(
+                context,
+                widget.datastore,
+                widget.monthlyList
+                    .where((element) => element.tagId == i)
+                    .toList(),
+                tagMap[i]!);
           },
           child: Container(
             margin: const EdgeInsets.fromLTRB(15, 1, 20, 2),
@@ -187,8 +202,7 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                    "${tagMap[i]!} (${(spendingPerCategory[i]! / totalSpending *
-                        100).round()}%)",
+                    "${tagMap[i]!} (${(spendingPerCategory[i]! / totalSpending * 100).round()}%)",
                     style: GoogleFonts.lato(
                         textStyle: const TextStyle(
                             fontSize: 17, fontWeight: FontWeight.w400))),
@@ -255,62 +269,62 @@ class _SpendingByCategoryState extends State<SpendingByCategoryWidget> {
             body: pieChartData.isEmpty
                 ? Container(child: Center(child: Text("No Data Found")))
                 : Column(
-              children: [
-                SizedBox(
-                  height: 50,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                        child: Text(
-                            showPieChart
-                                ? "Spending Per Category"
-                                : "Spending Per Category/Account",
-                            style: GoogleFonts.lato(
-                                textStyle: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w600))),
-                      ),
-                      const Spacer(),
-                      Container(
-                          margin: const EdgeInsets.fromLTRB(0, 0, 15, 0),
-                          child: IconButton(
-                              onPressed: () {
-                                widget.datastore.setPref(
-                                    "show_pieChart", !showPieChart);
+                      SizedBox(
+                        height: 50,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                              child: Text(
+                                  showPieChart
+                                      ? "Spending Per Category"
+                                      : "Spending Per Category/Account",
+                                  style: GoogleFonts.lato(
+                                      textStyle: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w600))),
+                            ),
+                            const Spacer(),
+                            Container(
+                                margin: const EdgeInsets.fromLTRB(0, 0, 15, 0),
+                                child: IconButton(
+                                    onPressed: () {
+                                      widget.datastore.setPref(
+                                          "show_pieChart", !showPieChart);
 
-                                setState(() {
-                                  showPieChart = !showPieChart;
-                                });
-                              },
-                              icon: Icon(showPieChart
-                                  ? CarbonIcons.chart_bar
-                                  : CarbonIcons.chart_pie)))
-                    ],
-                  ),
-                ),
-                showPieChart ? pieChartCategory() : barChartCategory(),
-                const SizedBox(
-                  height: 5,
-                ),
-                Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: MediaQuery.removePadding(
-                        removeTop: true,
-                        context: context,
-                        child: ListView(
-                          primary: false,
-                          shrinkWrap: true,
-                          children: showPieChart
-                              ? spendingByCategory()
-                              : spendingByAccountList(),
+                                      setState(() {
+                                        showPieChart = !showPieChart;
+                                      });
+                                    },
+                                    icon: Icon(showPieChart
+                                        ? CarbonIcons.chart_bar
+                                        : CarbonIcons.chart_pie)))
+                          ],
                         ),
                       ),
-                    ))
-              ],
-            )));
+                      showPieChart ? pieChartCategory() : barChartCategory(),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Expanded(
+                          child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: MediaQuery.removePadding(
+                          removeTop: true,
+                          context: context,
+                          child: ListView(
+                            primary: false,
+                            shrinkWrap: true,
+                            children: showPieChart
+                                ? spendingByCategory()
+                                : spendingByAccountList(),
+                          ),
+                        ),
+                      ))
+                    ],
+                  )));
   }
 }
 
