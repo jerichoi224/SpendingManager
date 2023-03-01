@@ -71,12 +71,23 @@ class _CalendarState extends State<CalendarWidget> {
     entryList = widget.datastore.spendingList;
   }
 
-  List<SpendingEntry> _getSpendingCount(DateTime day) {
+  List<double> _getSpendingCount(DateTime day) {
     List<SpendingEntry> s = widget.datastore.spendingList
         .where((i) =>
             (isSameDay(day, DateTime.fromMillisecondsSinceEpoch(i.dateTime))))
         .toList();
-    return s;
+    if (s.isNotEmpty) {
+      List<double> ret = [0, 0];
+      for (SpendingEntry i in s) {
+        if (i.itemType == ItemType.expense.intVal) {
+          ret[0] += i.value;
+        } else if (i.itemType == ItemType.income.intVal) {
+          ret[1] += i.value;
+        }
+      }
+      return ret;
+    }
+    return [0, 0];
   }
 
   Widget moneyText(SpendingEntry item, bool receiveAcc) {
@@ -280,36 +291,51 @@ class _CalendarState extends State<CalendarWidget> {
                   height: MediaQuery.of(context).viewPadding.top,
                 ),
                 TableCalendar(
-                  firstDay: DateTime.utc(2010, 10, 16),
-                  lastDay: DateTime.utc(2030, 3, 14),
-                  focusedDay: _focusedDay,
-                  calendarFormat: _calendarFormat,
-                  selectedDayPredicate: (day) {
-                    return isSameDay(_selectedDay, day);
-                  },
-                  onFormatChanged: (format) {
-                    if (_calendarFormat != format) {
-                      widget.datastore.setPref(
-                          "calendar_format", calendarFormatnameMap[format]);
-                      // Call `setState()` when updating calendar format
-                      setState(() {
-                        _calendarFormat = format;
-                      });
-                    }
-                  },
-                  onDaySelected: (selectedDay, focusedDay) {
-                    if (!isSameDay(_selectedDay, selectedDay)) {
-                      // Call `setState()` when updating the selected day
-                      setState(() {
-                        _selectedDay = selectedDay;
-                        _focusedDay = focusedDay;
-                      });
-                    }
-                  },
-                  eventLoader: (day) {
-                    return _getSpendingCount(day);
-                  },
-                ),
+                    firstDay: DateTime.utc(2010, 10, 16),
+                    lastDay: DateTime.utc(2030, 3, 14),
+                    focusedDay: _focusedDay,
+                    calendarFormat: _calendarFormat,
+                    selectedDayPredicate: (day) {
+                      return isSameDay(_selectedDay, day);
+                    },
+                    onFormatChanged: (format) {
+                      if (_calendarFormat != format) {
+                        widget.datastore.setPref(
+                            "calendar_format", calendarFormatnameMap[format]);
+                        // Call `setState()` when updating calendar format
+                        setState(() {
+                          _calendarFormat = format;
+                        });
+                      }
+                    },
+                    onDaySelected: (selectedDay, focusedDay) {
+                      if (!isSameDay(_selectedDay, selectedDay)) {
+                        // Call `setState()` when updating the selected day
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                        });
+                      }
+                    },
+                    eventLoader: (day) {
+                      return _getSpendingCount(day);
+                    },
+                    calendarStyle: const CalendarStyle(
+                      markersAlignment: Alignment.bottomCenter,
+                    ),
+                    calendarBuilders: CalendarBuilders(
+                        markerBuilder: (context, day, events) =>
+                            events[0] == 0 && events[1] == 0
+                                ? Container()
+                                : Text(
+                                    moneyFormat(
+                                        '${events[0]}', currency, false),
+                                    style: GoogleFonts.lato(
+                                        textStyle: const TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w400)),
+                                  ))),
                 Container(
                   margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
                   height: 10,
