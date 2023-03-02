@@ -35,7 +35,7 @@ class _CalendarState extends State<CalendarWidget> {
   };
 
   Map<int, Color> itemTypeColor = {
-    ItemType.income.intVal: Colors.blue,
+    ItemType.income.intVal: const Color.fromRGBO(21, 101, 192, 1),
     ItemType.expense.intVal: Colors.black,
   };
 
@@ -99,13 +99,12 @@ class _CalendarState extends State<CalendarWidget> {
     bool excluded = (amount < 0 && item.excludeFromSpending) ||
         (amount > 0 && item.excludeFromIncome);
 
-    String text = amount.toString();
-    if (amount > 0) {
-      text = "+$text";
-    }
+    String amountText = moneyFormat(amount.toString(), currency, true);
+
+    if (amount > 0) amountText = "+$amountText";
 
     return Text(
-      moneyFormat(text, currency, true),
+      amountText,
       style: GoogleFonts.lato(
           textStyle: TextStyle(
               fontSize: 16,
@@ -180,14 +179,27 @@ class _CalendarState extends State<CalendarWidget> {
                 ),
               ),
               const Spacer(),
-              dayExpense != 0
-                  ? Text(
-                      moneyFormat(dayExpense.toString(), currency, true),
-                      style: GoogleFonts.lato(
-                          textStyle: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600)),
-                    )
-                  : Container(),
+              if (dayIncome != 0) ...[
+                Text(
+                  '+${moneyFormat(dayIncome.toString(), currency, true)}',
+                  style: GoogleFonts.lato(
+                      textStyle: const TextStyle(
+                          color: Color.fromRGBO(21, 101, 192, 1),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600)),
+                )
+              ],
+              if (dayExpense != 0) ...[
+                const SizedBox(
+                  width: 15,
+                ),
+                Text(
+                  moneyFormat(dayExpense.toString(), currency, true),
+                  style: GoogleFonts.lato(
+                      textStyle: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600)),
+                )
+              ]
             ],
           ),
         ));
@@ -279,6 +291,29 @@ class _CalendarState extends State<CalendarWidget> {
     return historyList;
   }
 
+  Widget calendarText(List<dynamic> events) {
+    List<Widget> textChildren = [];
+
+    if (events[1] != 0.0) {
+      textChildren.add(Text('+${moneyFormat('${events[1]}', currency, false)}',
+          style: GoogleFonts.lato(
+              textStyle: const TextStyle(
+                  color: Color.fromRGBO(21, 101, 192, 1),
+                  fontSize: 9,
+                  fontWeight: FontWeight.w400))));
+    }
+    if (events[0] != 0.0) {
+      textChildren.add(Text(moneyFormat('${events[0]}', currency, false),
+          style: GoogleFonts.lato(
+              textStyle: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w400))));
+    }
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.end, children: textChildren);
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -327,15 +362,7 @@ class _CalendarState extends State<CalendarWidget> {
                         markerBuilder: (context, day, events) =>
                             events[0] == 0 && events[1] == 0
                                 ? Container()
-                                : Text(
-                                    moneyFormat(
-                                        '${events[0]}', currency, false),
-                                    style: GoogleFonts.lato(
-                                        textStyle: const TextStyle(
-                                            color: Colors.black87,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w400)),
-                                  ))),
+                                : calendarText(events))),
                 Container(
                   margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
                   height: 10,

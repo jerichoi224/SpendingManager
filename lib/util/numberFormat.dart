@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-moneyFormat(String value, String currency, bool currencyText){
+String moneyFormat(String value, String currency, bool currencyText){
   double val = double.parse(value);
   switch(currency){
     case "USD": {
