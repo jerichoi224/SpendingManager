@@ -12,6 +12,7 @@ import 'package:spending_manager/util/categoryIconMap.dart';
 import 'package:spending_manager/widgets/components/viewEditSpendingPopup.dart';
 import 'package:spending_manager/widgets/components/viewEditTransferPopup.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class CalendarWidget extends StatefulWidget {
   late Datastore datastore;
@@ -38,6 +39,14 @@ class _CalendarState extends State<CalendarWidget> {
     ItemType.income.intVal: const Color.fromRGBO(21, 101, 192, 1),
     ItemType.expense.intVal: Colors.black,
   };
+
+  Map<String, Widget> calendarListWidgetsMap = {};
+  Map<String, int> dateToIndexMap = {};
+  Map<int, String> indexToDateMap = {};
+
+  final ItemScrollController itemScrollController = ItemScrollController();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
 
   CalendarFormat _calendarFormat = CalendarFormat.week;
 
@@ -150,23 +159,20 @@ class _CalendarState extends State<CalendarWidget> {
     }
   }
 
-  List<Widget> spendingHistory() {
+  dynamic buildSpendingHistory() {
+    calendarListWidgetsMap.clear();
+    dateToIndexMap.clear();
+
     if (monthlyList.isEmpty) {
-      return [
-        Container(
-            margin: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-            child: const Center(child: Text("No record found")))
-      ];
+      return Container(
+          margin: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+          child: const Center(child: Text("No record found")));
     }
 
-    List<Widget> historyList = [
-      const SizedBox(
-        height: 20,
-      )
-    ];
     List<SpendingEntry> tmpList = [];
     double dayExpense = 0;
     double dayIncome = 0;
+    List<Widget> columnChild = [];
 
     monthlyList.sort((a, b) => b.dateTime.compareTo(a.dateTime));
     DateTime currentDate =
@@ -177,10 +183,11 @@ class _CalendarState extends State<CalendarWidget> {
       if (i != monthlyList.length) {
         entry = monthlyList[i];
       }
+
       DateTime entryDate = DateTime.fromMillisecondsSinceEpoch(entry.dateTime);
       String entryDay = DateFormat('yyyy-MM-dd').format(entryDate);
       if (entryDay != currentDay || i == monthlyList.length) {
-        historyList.add(Container(
+        columnChild.add(Container(
           margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
           height: 40,
           child: Row(
@@ -219,7 +226,7 @@ class _CalendarState extends State<CalendarWidget> {
           ),
         ));
 
-        historyList.add(const Divider(
+        columnChild.add(const Divider(
           indent: 10,
           endIndent: 10,
           height: 10,
@@ -230,7 +237,7 @@ class _CalendarState extends State<CalendarWidget> {
         for (SpendingEntry item in List.from(tmpList)) {
           if (item.itemType == ItemType.transfer.intVal) // Receive Entry
           {
-            historyList.add(Container(
+            columnChild.add(Container(
                 margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                 child: InkWell(
                     customBorder: RoundedRectangleBorder(
@@ -256,7 +263,7 @@ class _CalendarState extends State<CalendarWidget> {
                         subtitle: Text(accIdString[item.recAccId]!),
                         trailing: moneyText(item, true)))));
           }
-          historyList.add(Container(
+          columnChild.add(Container(
               margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
               child: InkWell(
                 customBorder: RoundedRectangleBorder(
@@ -284,7 +291,11 @@ class _CalendarState extends State<CalendarWidget> {
                     trailing: moneyText(item, false)),
               )));
         }
-
+        dateToIndexMap[currentDay] = calendarListWidgetsMap.keys.length;
+        indexToDateMap[calendarListWidgetsMap.keys.length] = currentDay;
+        calendarListWidgetsMap[currentDay] =
+            Column(children: List.from(columnChild));
+        columnChild.clear();
         currentDay = entryDay;
         currentDate = entryDate;
         tmpList.clear();
@@ -303,7 +314,18 @@ class _CalendarState extends State<CalendarWidget> {
       tmpList.add(entry);
     }
 
-    return historyList;
+    print(calendarListWidgetsMap);
+
+    ScrollablePositionedList history = ScrollablePositionedList.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: calendarListWidgetsMap.entries.length,
+      itemBuilder: (context, index) =>
+          calendarListWidgetsMap[indexToDateMap[index]!]!,
+      itemScrollController: itemScrollController,
+      itemPositionsListener: itemPositionsListener,
+    );
+
+    return history;
   }
 
   Widget calendarText(List<dynamic> events) {
@@ -361,6 +383,15 @@ class _CalendarState extends State<CalendarWidget> {
                     onDaySelected: (selectedDay, focusedDay) {
                       if (!isSameDay(_selectedDay, selectedDay)) {
                         // Call `setState()` when updating the selected day
+
+                        String dayKey =
+                            DateFormat('yyyy-MM-dd').format(selectedDay);
+                        if (dateToIndexMap.keys.contains(dayKey)) {
+                          itemScrollController.scrollTo(
+                              index: dateToIndexMap[dayKey]!,
+                              duration: const Duration(seconds: 1),
+                              curve: Curves.easeInOutCubic);
+                        }
                         setState(() {
                           _selectedDay = selectedDay;
                           _focusedDay = focusedDay;
@@ -391,8 +422,9 @@ class _CalendarState extends State<CalendarWidget> {
                   height: 10,
                   color: Colors.grey.shade100,
                 ),
-                Expanded(
-                  child: SingleChildScrollView(
+                Expanded(child: buildSpendingHistory()
+                    /*
+                    SingleChildScrollView(
                       scrollDirection: Axis.vertical,
                       child: MediaQuery.removePadding(
                         removeTop: true,
@@ -400,10 +432,12 @@ class _CalendarState extends State<CalendarWidget> {
                         child: ListView(
                           primary: false,
                           shrinkWrap: true,
-                          children: spendingHistory(),
+                          children: ,
                         ),
                       )),
-                )
+
+                     */
+                    )
               ],
             )));
   }
