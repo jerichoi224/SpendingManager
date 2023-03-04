@@ -44,6 +44,7 @@ class _CalendarState extends State<CalendarWidget> {
   Map<int, String> accIdString = {};
 
   List<SpendingEntry> entryList = [];
+  List<SpendingEntry> monthlyList = [];
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
@@ -53,6 +54,7 @@ class _CalendarState extends State<CalendarWidget> {
   @override
   void initState() {
     updateState();
+    updateMonthlyList(DateTime.now());
     locale = widget.datastore.getPref("locale") ?? "en";
     currency = widget.datastore.getPref("currency") ?? "KRW";
 
@@ -63,8 +65,21 @@ class _CalendarState extends State<CalendarWidget> {
     for (AccountEntry entry in widget.datastore.accountList) {
       accIdString[entry.id] = entry.caption;
     }
-
     super.initState();
+  }
+
+  updateMonthlyList(DateTime date) {
+    DateTime start = DateTime(date.year, date.month, 1);
+    DateTime end = (date.month < 12)
+        ? DateTime(date.year, date.month + 1, 1)
+        : DateTime(date.year + 1, 1, 1);
+
+    // Get Monthly Spending list on Change
+    monthlyList = entryList
+        .where((element) =>
+            element.dateTime >= start.millisecondsSinceEpoch &&
+            element.dateTime < end.millisecondsSinceEpoch)
+        .toList();
   }
 
   updateState() {
@@ -136,7 +151,7 @@ class _CalendarState extends State<CalendarWidget> {
   }
 
   List<Widget> spendingHistory() {
-    if (entryList.isEmpty) {
+    if (monthlyList.isEmpty) {
       return [
         Container(
             margin: const EdgeInsets.fromLTRB(0, 20, 0, 0),
@@ -153,18 +168,18 @@ class _CalendarState extends State<CalendarWidget> {
     double dayExpense = 0;
     double dayIncome = 0;
 
-    entryList.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+    monthlyList.sort((a, b) => b.dateTime.compareTo(a.dateTime));
     DateTime currentDate =
-        DateTime.fromMillisecondsSinceEpoch(entryList[0].dateTime);
+        DateTime.fromMillisecondsSinceEpoch(monthlyList[0].dateTime);
     String currentDay = DateFormat('yyyy-MM-dd').format(currentDate);
-    SpendingEntry entry = entryList[0];
-    for (int i = 0; i <= entryList.length; i++) {
-      if (i != entryList.length) {
-        entry = entryList[i];
+    SpendingEntry entry = monthlyList[0];
+    for (int i = 0; i <= monthlyList.length; i++) {
+      if (i != monthlyList.length) {
+        entry = monthlyList[i];
       }
       DateTime entryDate = DateTime.fromMillisecondsSinceEpoch(entry.dateTime);
       String entryDay = DateFormat('yyyy-MM-dd').format(entryDate);
-      if (entryDay != currentDay || i == entryList.length) {
+      if (entryDay != currentDay || i == monthlyList.length) {
         historyList.add(Container(
           margin: const EdgeInsets.fromLTRB(15, 0, 20, 0),
           height: 40,
@@ -299,16 +314,16 @@ class _CalendarState extends State<CalendarWidget> {
           style: GoogleFonts.lato(
               textStyle: const TextStyle(
                   color: Color.fromRGBO(21, 101, 192, 1),
-                  fontSize: 9,
-                  fontWeight: FontWeight.w400))));
+                  fontSize: 8,
+                  fontWeight: FontWeight.w500))));
     }
     if (events[0] != 0.0) {
       textChildren.add(Text(moneyFormat('${events[0]}', currency, false),
           style: GoogleFonts.lato(
               textStyle: const TextStyle(
                   color: Colors.black87,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w400))));
+                  fontSize: 8,
+                  fontWeight: FontWeight.w500))));
     }
     return Column(
         mainAxisAlignment: MainAxisAlignment.end, children: textChildren);
@@ -352,6 +367,14 @@ class _CalendarState extends State<CalendarWidget> {
                         });
                       }
                     },
+                    onPageChanged: (focusedDay) {
+                      setState(() {
+                        updateMonthlyList(focusedDay);
+                        _focusedDay = focusedDay;
+                        _selectedDay = DateTime(focusedDay.year,
+                            focusedDay.month, _selectedDay?.day ?? 1);
+                      });
+                    },
                     eventLoader: (day) {
                       return _getSpendingCount(day);
                     },
@@ -364,7 +387,7 @@ class _CalendarState extends State<CalendarWidget> {
                                 ? Container()
                                 : calendarText(events))),
                 Container(
-                  margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                   height: 10,
                   color: Colors.grey.shade100,
                 ),
