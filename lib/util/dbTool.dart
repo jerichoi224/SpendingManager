@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:spending_manager/dbModels/categoryEntry.dart';
 import 'package:spending_manager/dbModels/accountEntry.dart';
 import 'package:spending_manager/dbModels/spending_entry_model.dart';
+import 'package:spending_manager/dbModels/subscriptionEntry.dart';
 import 'package:spending_manager/objectbox.g.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
@@ -22,6 +23,8 @@ class Datastore {
   List<CategoryEntry> categoryList = [];
   late Box<AccountEntry> accountBox;
   List<AccountEntry> accountList = [];
+  late Box<SubscriptionEntry> subscriptionBox;
+  List<SubscriptionEntry> subscirptionList = [];
 
   Datastore._create(this.store, this.prefs) {
     initObjectBox();
@@ -34,6 +37,8 @@ class Datastore {
     categoryList = categoryBox.getAll();
     accountBox = Box<AccountEntry>(store);
     accountList = accountBox.getAll();
+    subscriptionBox = Box<SubscriptionEntry>(store);
+    subscirptionList = subscriptionBox.getAll();
 
     for (String key in prefs.getKeys()) {
       prefMap[key] = prefs.get(key);

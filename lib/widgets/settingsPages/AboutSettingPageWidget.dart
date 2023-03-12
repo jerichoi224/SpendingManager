@@ -43,6 +43,10 @@ class _AboutSettingPageState extends State<AboutSettingPageWidget> {
           fontWeight: FontWeight.bold,
           fontSize: 22));
 
+  TextStyle titleText = GoogleFonts.lato(
+      textStyle: const TextStyle(
+          color: Colors.black, fontWeight: FontWeight.w600, fontSize: 15));
+
   TextStyle menuText = GoogleFonts.lato(
       textStyle: const TextStyle(
           color: Colors.black, fontWeight: FontWeight.normal, fontSize: 15));
@@ -80,7 +84,7 @@ class _AboutSettingPageState extends State<AboutSettingPageWidget> {
                               child: Text(
                                   AppLocalizations.of(context)!
                                       .settings_developer_info,
-                                  style: menuText)),
+                                  style: titleText)),
                           Container(
                             padding: const EdgeInsets.fromLTRB(30, 10, 20, 10),
                             child: Row(children: <Widget>[
@@ -103,7 +107,7 @@ class _AboutSettingPageState extends State<AboutSettingPageWidget> {
                           Container(
                               padding: const EdgeInsets.fromLTRB(20, 20, 0, 10),
                               child: Text(AppLocalizations.of(context)!.credits,
-                                  style: menuText)),
+                                  style: titleText)),
                           Container(
                               padding:
                                   const EdgeInsets.fromLTRB(30, 10, 20, 10),

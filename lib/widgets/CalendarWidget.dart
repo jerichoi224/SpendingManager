@@ -314,8 +314,6 @@ class _CalendarState extends State<CalendarWidget> {
       tmpList.add(entry);
     }
 
-    print(calendarListWidgetsMap);
-
     ScrollablePositionedList history = ScrollablePositionedList.builder(
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: calendarListWidgetsMap.entries.length,

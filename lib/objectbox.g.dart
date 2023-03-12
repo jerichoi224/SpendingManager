@@ -17,6 +17,7 @@ import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 import 'dbModels/accountEntry.dart';
 import 'dbModels/categoryEntry.dart';
 import 'dbModels/spending_entry_model.dart';
+import 'dbModels/subscriptionEntry.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
@@ -83,7 +84,7 @@ final _entities = <ModelEntity>[
   ModelEntity(
       id: const IdUid(2, 4628037891868379992),
       name: 'AccountEntry',
-      lastPropertyId: const IdUid(3, 5877470395505109673),
+      lastPropertyId: const IdUid(12, 4146724335968185070),
       flags: 0,
       properties: <ModelProperty>[
         ModelProperty(
@@ -137,6 +138,75 @@ final _entities = <ModelEntity>[
             flags: 0)
       ],
       relations: <ModelRelation>[],
+      backlinks: <ModelBacklink>[]),
+  ModelEntity(
+      id: const IdUid(4, 339781400904698153),
+      name: 'SubscriptionEntry',
+      lastPropertyId: const IdUid(12, 7092018692399597984),
+      flags: 0,
+      properties: <ModelProperty>[
+        ModelProperty(
+            id: const IdUid(1, 8889103460676735390),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        ModelProperty(
+            id: const IdUid(2, 7483632844973367605),
+            name: 'accId',
+            type: 6,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(3, 3804804196151179403),
+            name: 'amount',
+            type: 8,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(4, 4334730256663215889),
+            name: 'tagId',
+            type: 6,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(5, 7746341186528567602),
+            name: 'caption',
+            type: 9,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(6, 6195353886424052043),
+            name: 'show',
+            type: 1,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(7, 7523886048058297245),
+            name: 'enabled',
+            type: 1,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(8, 6142704881520708855),
+            name: 'repeatType',
+            type: 6,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(9, 6233568357190563081),
+            name: 'renewMonth',
+            type: 6,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(10, 8424235496591900317),
+            name: 'repeatNum',
+            type: 6,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(11, 1639184482840924624),
+            name: 'endDate',
+            type: 6,
+            flags: 0),
+        ModelProperty(
+            id: const IdUid(12, 7092018692399597984),
+            name: 'startDate',
+            type: 6,
+            flags: 0)
+      ],
+      relations: <ModelRelation>[],
       backlinks: <ModelBacklink>[])
 ];
 
@@ -160,7 +230,7 @@ Future<Store> openStore(
 ModelDefinition getObjectBoxModel() {
   final model = ModelInfo(
       entities: _entities,
-      lastEntityId: const IdUid(3, 6876147056865672656),
+      lastEntityId: const IdUid(4, 339781400904698153),
       lastIndexId: const IdUid(0, 0),
       lastRelationId: const IdUid(0, 0),
       lastSequenceId: const IdUid(0, 0),
@@ -169,7 +239,16 @@ ModelDefinition getObjectBoxModel() {
       retiredPropertyUids: const [
         5060431788235565225,
         5741241459831399899,
-        8425197643574923808
+        8425197643574923808,
+        5907243860043474919,
+        4137086924124134754,
+        7432248733667643728,
+        15194870399924056,
+        6089891455904726489,
+        5003231796258913563,
+        8733589571265371023,
+        3537792083452359201,
+        4146724335968185070
       ],
       retiredRelationUids: const [],
       modelVersion: 5,
@@ -238,7 +317,7 @@ ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (AccountEntry object, fb.Builder fbb) {
           final captionOffset = fbb.writeString(object.caption);
-          fbb.startTable(4);
+          fbb.startTable(13);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, captionOffset);
           fbb.addBool(2, object.show);
@@ -291,6 +370,62 @@ ModelDefinition getObjectBoxModel() {
             ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
             ..show =
                 const fb.BoolReader().vTableGet(buffer, rootOffset, 10, false);
+
+          return object;
+        }),
+    SubscriptionEntry: EntityDefinition<SubscriptionEntry>(
+        model: _entities[3],
+        toOneRelations: (SubscriptionEntry object) => [],
+        toManyRelations: (SubscriptionEntry object) => {},
+        getId: (SubscriptionEntry object) => object.id,
+        setId: (SubscriptionEntry object, int id) {
+          object.id = id;
+        },
+        objectToFB: (SubscriptionEntry object, fb.Builder fbb) {
+          final captionOffset = fbb.writeString(object.caption);
+          fbb.startTable(13);
+          fbb.addInt64(0, object.id);
+          fbb.addInt64(1, object.accId);
+          fbb.addFloat64(2, object.amount);
+          fbb.addInt64(3, object.tagId);
+          fbb.addOffset(4, captionOffset);
+          fbb.addBool(5, object.show);
+          fbb.addBool(6, object.enabled);
+          fbb.addInt64(7, object.repeatType);
+          fbb.addInt64(8, object.renewMonth);
+          fbb.addInt64(9, object.repeatNum);
+          fbb.addInt64(10, object.endDate);
+          fbb.addInt64(11, object.startDate);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+
+          final object = SubscriptionEntry(
+              caption: const fb.StringReader(asciiOptimization: true)
+                  .vTableGet(buffer, rootOffset, 12, ''))
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+            ..accId = const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0)
+            ..amount =
+                const fb.Float64Reader().vTableGet(buffer, rootOffset, 8, 0)
+            ..tagId =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0)
+            ..show =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false)
+            ..enabled =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 16, false)
+            ..repeatType =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0)
+            ..renewMonth =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0)
+            ..repeatNum =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 22, 0)
+            ..endDate =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 24, 0)
+            ..startDate =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 26, 0);
 
           return object;
         })
@@ -378,4 +513,55 @@ class CategoryEntry_ {
   /// see [CategoryEntry.basic]
   static final basic =
       QueryBooleanProperty<CategoryEntry>(_entities[2].properties[4]);
+}
+
+/// [SubscriptionEntry] entity fields to define ObjectBox queries.
+class SubscriptionEntry_ {
+  /// see [SubscriptionEntry.id]
+  static final id =
+      QueryIntegerProperty<SubscriptionEntry>(_entities[3].properties[0]);
+
+  /// see [SubscriptionEntry.accId]
+  static final accId =
+      QueryIntegerProperty<SubscriptionEntry>(_entities[3].properties[1]);
+
+  /// see [SubscriptionEntry.amount]
+  static final amount =
+      QueryDoubleProperty<SubscriptionEntry>(_entities[3].properties[2]);
+
+  /// see [SubscriptionEntry.tagId]
+  static final tagId =
+      QueryIntegerProperty<SubscriptionEntry>(_entities[3].properties[3]);
+
+  /// see [SubscriptionEntry.caption]
+  static final caption =
+      QueryStringProperty<SubscriptionEntry>(_entities[3].properties[4]);
+
+  /// see [SubscriptionEntry.show]
+  static final show =
+      QueryBooleanProperty<SubscriptionEntry>(_entities[3].properties[5]);
+
+  /// see [SubscriptionEntry.enabled]
+  static final enabled =
+      QueryBooleanProperty<SubscriptionEntry>(_entities[3].properties[6]);
+
+  /// see [SubscriptionEntry.repeatType]
+  static final repeatType =
+      QueryIntegerProperty<SubscriptionEntry>(_entities[3].properties[7]);
+
+  /// see [SubscriptionEntry.renewMonth]
+  static final renewMonth =
+      QueryIntegerProperty<SubscriptionEntry>(_entities[3].properties[8]);
+
+  /// see [SubscriptionEntry.repeatNum]
+  static final repeatNum =
+      QueryIntegerProperty<SubscriptionEntry>(_entities[3].properties[9]);
+
+  /// see [SubscriptionEntry.endDate]
+  static final endDate =
+      QueryIntegerProperty<SubscriptionEntry>(_entities[3].properties[10]);
+
+  /// see [SubscriptionEntry.startDate]
+  static final startDate =
+      QueryIntegerProperty<SubscriptionEntry>(_entities[3].properties[11]);
 }

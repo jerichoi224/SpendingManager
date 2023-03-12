@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:spending_manager/dbModels/accountEntry.dart';
+import 'package:spending_manager/dbModels/subscriptionEntry.dart';
 import 'package:spending_manager/util/dbTool.dart';
 import 'package:spending_manager/widgets/components/confirmPopup.dart';
 import 'package:spending_manager/widgets/components/editCaptionDialog.dart';
+import 'package:spending_manager/widgets/subscriptionPages/AddEditSubscriptionWidget.dart';
 
 class SubscriptionWidget extends StatefulWidget {
   late Datastore datastore;
@@ -19,7 +20,7 @@ class SubscriptionWidget extends StatefulWidget {
 }
 
 class _SubscriptionState extends State<SubscriptionWidget> {
-  List<AccountEntry> accountList = [];
+  List<SubscriptionEntry> subscriptionList = [];
 
   @override
   void initState() {
@@ -28,8 +29,9 @@ class _SubscriptionState extends State<SubscriptionWidget> {
   }
 
   void updateList() {
-    accountList =
-        widget.datastore.accountList.where((element) => element.show).toList();
+    subscriptionList = widget.datastore.subscirptionList
+        .where((element) => element.show)
+        .toList();
   }
 
   Widget div = const Divider(
@@ -56,22 +58,34 @@ class _SubscriptionState extends State<SubscriptionWidget> {
         ));
   }
 
-  void openEditSubscription(AccountEntry entry) async {
-    final result = await editCaptionDialog(context, "Change Name", entry.caption);
+  void openEditSubscription(SubscriptionEntry entry) async {
+    final result =
+        await editCaptionDialog(context, "Change Name", entry.caption);
     if (result.runtimeType == String) {
       entry.caption = result;
-      widget.datastore.accountBox.put(entry);
-      widget.datastore.accountList = widget.datastore.accountBox.getAll();
+      widget.datastore.subscriptionBox.put(entry);
+      widget.datastore.subscirptionList =
+          widget.datastore.subscriptionBox.getAll();
       updateList();
       setState(() {});
     }
   }
 
   void openAddSubscription() async {
-
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddEditSubscriptionWidget(
+            datastore: widget.datastore,
+            edit: false,
+          ),
+        ));
+    setState(() {
+      updateList();
+    });
   }
 
-  Widget _popUpMenuButton(AccountEntry entry) {
+  Widget _popUpMenuButton(SubscriptionEntry entry) {
     return PopupMenuButton(
       icon: const Icon(Icons.more_vert),
       itemBuilder: (context) => [
@@ -91,43 +105,43 @@ class _SubscriptionState extends State<SubscriptionWidget> {
         }
         // Delete
         else if (selectedIndex == 1) {
-          accountList.length == 1
+          subscriptionList.length == 1
               ? Fluttertoast.showToast(
-            msg: "You need to keep at least one account",
-          )
+                  msg: "You need to keep at least one account",
+                )
               : confirmPopup(
-              context,
-              "Delete Account?",
-              "Previous records of this account will remain, but you will no longer be able to add entries using this account.",
-              "Yes",
-              "No")
-              .then((value) {
-            if (value) {
-              entry.show = false;
-              widget.datastore.accountBox.put(entry);
-              widget.datastore.accountList =
-                  widget.datastore.accountBox.getAll();
-              setState(() {
-                updateList();
-              });
-            }
-          });
+                      context,
+                      "Delete Account?",
+                      "Previous records of this account will remain, but you will no longer be able to add entries using this account.",
+                      "Yes",
+                      "No")
+                  .then((value) {
+                  if (value) {
+                    entry.show = false;
+                    widget.datastore.subscriptionBox.put(entry);
+                    widget.datastore.subscirptionList =
+                        widget.datastore.subscriptionBox.getAll();
+                    setState(() {
+                      updateList();
+                    });
+                  }
+                });
         }
       },
     );
   }
 
-  Widget buildAccountList(BuildContext context, int index) {
-    AccountEntry accountEntry = accountList[index];
+  Widget buildSubscriptionList(BuildContext context, int index) {
+    SubscriptionEntry subscriptionEntry = subscriptionList[index];
 
     return ListTile(
       dense: true,
       contentPadding: const EdgeInsets.fromLTRB(25, 0, 0, 0),
       title: Text(
-        accountEntry.caption,
+        subscriptionEntry.caption,
         style: menuText,
       ),
-      trailing: _popUpMenuButton(accountEntry),
+      trailing: _popUpMenuButton(subscriptionEntry),
       onTap: () {},
     );
   }
@@ -154,8 +168,8 @@ class _SubscriptionState extends State<SubscriptionWidget> {
                   context: context,
                   removeTop: true,
                   child: ListView.builder(
-                    itemCount: accountList.length,
-                    itemBuilder: buildAccountList,
+                    itemCount: subscriptionList.length,
+                    itemBuilder: buildSubscriptionList,
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                   ),
