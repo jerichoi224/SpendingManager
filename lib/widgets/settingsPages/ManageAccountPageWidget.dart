@@ -1,3 +1,4 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,6 +21,7 @@ class ManageAccPageWidget extends StatefulWidget {
 
 class _ManageAccPageState extends State<ManageAccPageWidget> {
   List<AccountEntry> accountList = [];
+  int mainAccount = 1;
 
   @override
   void initState() {
@@ -28,8 +30,10 @@ class _ManageAccPageState extends State<ManageAccPageWidget> {
   }
 
   void updateList() {
+    mainAccount = widget.datastore.getPref("mainAccount") ?? mainAccount;
     accountList =
         widget.datastore.accountList.where((element) => element.show).toList();
+    setState(() {});
   }
 
   Widget div = const Divider(
@@ -57,7 +61,8 @@ class _ManageAccPageState extends State<ManageAccPageWidget> {
   }
 
   void openEditCaption(AccountEntry entry) async {
-    final result = await editCaptionDialog(context, "Change Name", entry.caption);
+    final result =
+        await editCaptionDialog(context, "Change Name", entry.caption);
     if (result.runtimeType == String) {
       entry.caption = result;
       widget.datastore.accountBox.put(entry);
@@ -125,13 +130,34 @@ class _ManageAccPageState extends State<ManageAccPageWidget> {
 
   Widget buildAccountList(BuildContext context, int index) {
     AccountEntry accountEntry = accountList[index];
-
     return ListTile(
       dense: true,
       contentPadding: const EdgeInsets.fromLTRB(25, 0, 0, 0),
-      title: Text(
-        accountEntry.caption,
-        style: menuText,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            accountEntry.caption,
+            style: menuText,
+          ),
+          const Spacer(),
+          SizedBox(
+            height: 36,
+            width: 36,
+            child: IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () {
+                  widget.datastore.setPref("mainAccount", accountEntry.id);
+                  updateList();
+                },
+                icon: accountEntry.id == mainAccount
+                    ? const Icon(
+                        FluentIcons.star_20_filled,
+                        color: Colors.amber,
+                      )
+                    : const Icon(FluentIcons.star_20_regular)),
+          )
+        ],
       ),
       trailing: _popUpMenuButton(accountEntry),
       onTap: () {},
