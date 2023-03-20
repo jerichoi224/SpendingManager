@@ -33,6 +33,10 @@ class _ManageAccPageState extends State<ManageAccPageWidget> {
     mainAccount = widget.datastore.getPref("mainAccount") ?? mainAccount;
     accountList =
         widget.datastore.accountList.where((element) => element.show).toList();
+    if (accountList.where((element) => element.id == mainAccount).isEmpty) {
+      mainAccount = accountList[0].id;
+      widget.datastore.setPref("mainAccount", mainAccount);
+    }
     setState(() {});
   }
 
