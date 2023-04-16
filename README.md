@@ -1,17 +1,18 @@
-# spending_manager
+# My Spendings (Spending Manager)
 
 revised version of money tracker.
 
-## Getting Started
+Been working on this app for a while, but haven't had the motivaiton to completely finish it. 
 
-This project is a starting point for a Flutter application.
+Feel free to give it a try to keep track of your spendings
 
-A few resources to get you started if this is your first Flutter project:
+Maybe check out the code to see how I implemented stuff in flutter
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Honestly think its my best app so far, but sad I didn't finish it.. Maybe I will in the future? but don't see myself doing it in the near future so making the repo public.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# SpendingManager
+## Download
+https://drive.google.com/file/d/1B5oYskfsP6TQ_xsJ8Ud65N9Zj-C8JGAt/view?usp=sharing
+
+## License
+- https://www.syncfusion.com/products/communitylicense
+- https://opensource.org/license/bsd-3-clause/
