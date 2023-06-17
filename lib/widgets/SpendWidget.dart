@@ -54,7 +54,7 @@ class _SpendState extends State<SpendWidget> {
     itemType = ItemType.expense;
     account = accountList[0];
     int mainAccountId = widget.datastore.getPref("mainAccount") ?? -1;
-    account = accountList.firstWhere((element) => element.id == mainAccountId) ?? account;
+    account = accountList.firstWhere((element) => element.id == mainAccountId, orElse: () => account);
 
     accountRec = accountList[0];
     if (accountList.length > 1) {

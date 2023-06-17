@@ -124,7 +124,8 @@ class _SettingsState extends State<SettingsWidget> {
                           ),
                           menuItem("Manage Accounts", _openManageAccPage),
                           menuItem("Manage Categories", _openManageTagPage),
-                          menuItem("Manage Subscriptions", _openSubscriptionPage),
+                          // TODO: Future when I get the motivation...
+                          //  menuItem("Manage Subscriptions", _openSubscriptionPage),
                           div,
                           menuItem("About", () {
                             openAboutPage(context);

@@ -114,7 +114,7 @@ class _AboutSettingPageState extends State<AboutSettingPageWidget> {
                               child: Text(AppLocalizations.of(context)!.image,
                                   style: menuText)),
                           Container(
-                            padding: EdgeInsets.fromLTRB(40, 5, 0, 10),
+                            padding: const EdgeInsets.fromLTRB(40, 5, 0, 10),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
