@@ -1,4 +1,4 @@
-# My Spendings (Spending Manager)
+# My Spendings (Stopped Development)
 
 revised version of money tracker.
 
